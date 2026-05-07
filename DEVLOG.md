@@ -5,10 +5,10 @@
 **Blockers / What I'm stuck on:** None
 **Plan for tomorrow:** Draft system architecture, build the spend input form, build the audit engine as pure logic.
 
-## Day 2 — 
+## Day 2 — 2026-05-07
 **Hours worked:** 
-**What I did:** 
-**What I learned:** 
+**What I did:** Worked on the System Architecture. Built the Spend Input form. Added the Audit Engine.
+**What I learned:** Using Mermaid to build system architecture and visualize the user flow diagram. 
 **Blockers / What I'm stuck on:** 
 **Plan for tomorrow:** 
 

@@ -1,3 +1,4 @@
+//ai summary generator
 import { GoogleGenAI } from "@google/genai";
 import { AuditResult, ToolSpend } from "../types";
 
@@ -32,3 +33,4 @@ Do not be overly critical, focus on ROI and efficiency.`;
     return `Based on your team size of ${teamSize} and use case of ${useCase}, we've identified potential savings of $${result.totalSavingsMonthly} per month. Consider consolidating your tools to maximize efficiency.`;
   }
 }
+

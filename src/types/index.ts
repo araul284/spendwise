@@ -1,74 +1,81 @@
-/**
- * Types for the AI Spend Audit
- */
+export type UseCase = 'coding' | 'writing' | 'data' | 'research' | 'mixed';
 
-export enum PlanType {
-  FREE = 'Free',
-  HOBBY = 'Hobby',
-  INDIVIDUAL = 'Individual',
-  PRO = 'Pro',
-  PLUS = 'Plus',
-  TEAM = 'Team',
-  BUSINESS = 'Business',
-  ENTERPRISE = 'Enterprise',
-  API = 'API'
-}
+export type ToolId =
+  | 'cursor'
+  | 'github_copilot'
+  | 'claude'
+  | 'chatgpt'
+  | 'anthropic_api'
+  | 'openai_api'
+  | 'gemini'
+  | 'windsurf';
 
-export interface ToolSpend {
-  toolId: string;
-  name: string;
-  plan: PlanType;
-  monthlySpend: number;
+export interface ToolEntry {
+  toolId: ToolId;
+  plan: string;
   seats: number;
-}
-
-export enum UseCase {
-  CODING = 'coding',
-  WRITING = 'writing',
-  DATA = 'data',
-  RESEARCH = 'research',
-  MIXED = 'mixed'
+  monthlySpend: number; // user-reported, can override
 }
 
 export interface AuditInput {
-  tools: ToolSpend[];
+  tools: ToolEntry[];
   teamSize: number;
   useCase: UseCase;
 }
 
-export interface PlanComparison {
-  contextWindow: string;
-  maxOutputTokens: string;
-  primaryModel: string;
-  keyFeatures: string[];
-}
-
-export interface AuditRecommendation {
-  toolId: string;
-  currentPlan: PlanType;
-  recommendedPlan: PlanType;
-  savingsMonthly: number;
+export interface AuditFinding {
+  toolId: ToolId;
+  toolName: string;
+  currentPlan: string;
+  currentSpend: number;
+  status: 'overspending' | 'suboptimal' | 'optimal';
+  recommendation: string;
+  alternativeTool?: string;
+  alternativeToolUrl?: string;
+  suggestedSpend: number;
+  monthlySavings: number;
+  annualSavings: number;
   reason: string;
-  action: string;
-  comparison?: {
-    current: PlanComparison;
-    recommended: PlanComparison;
-  };
+  credexApplicable: boolean;
 }
 
 export interface AuditResult {
-  recommendations: AuditRecommendation[];
-  totalSavingsMonthly: number;
-  totalSavingsAnnual: number;
-  summary?: string;
-  id?: string;
-  createdAt?: string;
+  id: string;
+  input: AuditInput;
+  findings: AuditFinding[];
+  totalMonthlySavings: number;
+  totalAnnualSavings: number;
+  aiSummary?: string;
+  createdAt: string;
+  isOptimal: boolean;
 }
 
-export interface LeadInfo {
+export interface LeadCapture {
   email: string;
-  company?: string;
+  companyName?: string;
   role?: string;
   teamSize?: number;
   auditId: string;
+}
+
+export interface ToolDefinition {
+  id: ToolId;
+  name: string;
+  logo: string;
+  color: string;
+  plans: PlanDefinition[];
+  category: 'ide' | 'chat' | 'api';
+  url: string;
+  pricingUrl: string;
+}
+
+export interface PlanDefinition {
+  id: string;
+  name: string;
+  pricePerSeat: number; // per user/month
+  flatPrice?: number;   // if not per-seat
+  minSeats?: number;
+  maxSeats?: number;
+  features: string[];
+  useCaseFit: UseCase[];
 }

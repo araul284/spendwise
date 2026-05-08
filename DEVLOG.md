@@ -20,9 +20,18 @@
 **Plan for tomorrow:** Enhancing the UI. Work on the unit tests for audit engine (wrong plan, cheaper alternative, already-optimal case). Start with the first user interview.
 
 ## Day 3 — 2026-05-08
+**Hours worked:** 2
+**What I did:** Worked on refining the UI but couldn't tackle other tasks on my today's agenda as I was suffering from a very severe migraine.
+**What I learned:** 
+    - The different types of design aesthetics in web development. 
+    - What actually differentiates a design from the typical AI slop to something unique, tailored specifically to certain design requirements, customer and administrative needs.
+    - How to convert from one design type to another while still trying to maintain the original architecture, routing and types.
+**Blockers / What I'm stuck on:** None
+**Plan for tomorrow:** Work on the unit tests for audit engine (wrong plan, cheaper alternative, already-optimal case). Start with the first user interview. Integrate Anthropic API for personalized summary.
+
+## Day 4 — 2026-05-09
 **Hours worked:** 
 **What I did:** 
 **What I learned:** 
 **Blockers / What I'm stuck on:** 
 **Plan for tomorrow:** 
-

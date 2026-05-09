@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
-import { Share2, Download, RotateCcw, ShieldCheck, Info, TrendingDown, ArrowRight } from 'lucide-react';
-import type { AuditResult } from '../types';
+import { Share2, Download, RotateCcw, ShieldCheck, Info, ArrowRight } from 'lucide-react';
+import type { AuditResult, AuditFinding } from '../types';
 
 interface AuditResultsProps {
   audit: AuditResult;
@@ -18,46 +18,37 @@ function SectionLabel({ label }: { label: string }) {
   );
 }
 
-function DefensibleMatrix({ rec }: { rec: AuditResult['recommendations'][0] }) {
-  if (!rec.comparison) return null;
+function StatusBadge({ status }: { status: AuditFinding['status'] }) {
+  const styles: Record<AuditFinding['status'], string> = {
+    overspending: 'bg-red-950/40 border-red-900/50 text-red-400',
+    suboptimal:   'bg-amber-950/40 border-amber-900/50 text-amber-400',
+    optimal:      'bg-emerald-950/40 border-emerald-900/50 text-emerald-400',
+  };
+  const labels: Record<AuditFinding['status'], string> = {
+    overspending: '⚠ Overspending',
+    suboptimal:   '~ Suboptimal',
+    optimal:      '✓ Optimal',
+  };
   return (
-    <div className="border-t border-slate-800/60 bg-slate-950/80 p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Info size={10} className="text-slate-700" />
-        <span className="font-mono text-[8px] uppercase tracking-[0.25em] text-slate-700">Defensible Logic Matrix</span>
-      </div>
-      <div className="grid grid-cols-12 gap-2">
-        <div className="col-span-4 space-y-2">
-          <div className="font-mono text-[7px] uppercase tracking-widest text-slate-700 h-5">Attribute</div>
-          {['Context Window', 'Max Output', 'Primary Model', 'ROI Fit'].map(attr => (
-            <div key={attr} className="font-mono text-[9px] font-bold text-slate-400 py-1 border-b border-slate-800/60">{attr}</div>
-          ))}
-        </div>
-        <div className="col-span-4 space-y-2 text-center bg-red-950/30 border border-red-900/30 p-1 py-2">
-          <div className="font-mono text-[7px] uppercase tracking-widest text-red-600/70 h-5 italic">{rec.currentPlan}</div>
-          <div className="font-mono text-[9px] text-slate-500 py-1 border-b border-slate-800/40">{rec.comparison.current.contextWindow}</div>
-          <div className="font-mono text-[9px] text-slate-500 py-1 border-b border-slate-800/40">{rec.comparison.current.maxOutputTokens}</div>
-          <div className="font-mono text-[9px] text-slate-500 py-1 border-b border-slate-800/40">{rec.comparison.current.primaryModel}</div>
-          <div className="font-mono text-[9px] text-red-500 py-1">Diminishing ROI</div>
-        </div>
-        <div className="col-span-4 space-y-2 text-center bg-emerald-950/30 border border-emerald-900/30 p-1 py-2">
-          <div className="font-mono text-[7px] uppercase tracking-widest text-emerald-500/70 h-5 italic">{rec.recommendedPlan}</div>
-          <div className="font-mono text-[9px] font-bold text-slate-300 py-1 border-b border-slate-800/40">{rec.comparison.recommended.contextWindow}</div>
-          <div className="font-mono text-[9px] font-bold text-slate-300 py-1 border-b border-slate-800/40">{rec.comparison.recommended.maxOutputTokens}</div>
-          <div className="font-mono text-[9px] font-bold text-slate-300 py-1 border-b border-slate-800/40">{rec.comparison.recommended.primaryModel}</div>
-          <div className="font-mono text-[9px] font-bold text-emerald-400 py-1">MAX EFFICIENCY</div>
-        </div>
-      </div>
-    </div>
+    <span className={`inline-block font-mono text-[8px] uppercase tracking-widest border px-1.5 py-0.5 ${styles[status]}`}>
+      {labels[status]}
+    </span>
   );
 }
 
 export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResultsProps) {
   const reportRef = useRef<HTMLDivElement>(null);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied]       = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail]         = useState('');
   const [subscribed, setSubscribed] = useState(false);
+
+  // Use correct field names from AuditEngine output
+  const totalMonthly = audit.totalMonthlySavings ?? 0;
+  const totalAnnual  = audit.totalAnnualSavings  ?? 0;
+
+  // Only show findings that are not optimal
+  const actionableFindings = (audit.findings ?? []).filter(f => f.status !== 'optimal');
 
   async function handleShare() {
     try {
@@ -75,22 +66,59 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
         import('html2canvas'),
         import('jspdf'),
       ]);
+
       const canvas = await html2canvas(reportRef.current, {
-        scale: 2, useCORS: true, backgroundColor: '#000000',
-        onclone: (clonedDoc) => {
-          const elements = clonedDoc.getElementsByTagName('*');
-          for (let i = 0; i < elements.length; i++) {
-            const el = elements[i] as HTMLElement;
-            const style = window.getComputedStyle(el);
-            if (style.backgroundColor.includes('oklch') || style.backgroundColor.includes('oklab')) el.style.backgroundColor = '#000000';
-            if (style.color.includes('oklch') || style.color.includes('oklab')) el.style.color = '#e2e8f0';
-          }
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#000000',
+        // Fix: operate on cloned document elements with getComputedStyle on the CLONE
+        onclone: (_clonedDoc, clonedElement) => {
+          const elements = clonedElement.querySelectorAll<HTMLElement>('*');
+          elements.forEach(el => {
+            // Read styles from the cloned element itself (not window)
+            const bg = el.style.backgroundColor || el.style.background;
+            const fg = el.style.color;
+            // Wipe oklch/oklab — Tailwind v4 uses oklch, html2canvas can't render it
+            if (bg && (bg.includes('oklch') || bg.includes('oklab'))) {
+              el.style.backgroundColor = '#000000';
+            }
+            if (fg && (fg.includes('oklch') || fg.includes('oklab'))) {
+              el.style.color = '#e2e8f0';
+            }
+            // Also force inline computed backgrounds that Tailwind v4 injects via CSS vars
+            const computed = window.getComputedStyle(el);
+            const cBg = computed.backgroundColor;
+            const cFg = computed.color;
+            if (cBg && (cBg.includes('oklch') || cBg.includes('oklab'))) {
+              el.style.backgroundColor = '#0f0f0f';
+            }
+            if (cFg && (cFg.includes('oklch') || cFg.includes('oklab'))) {
+              el.style.color = '#e2e8f0';
+            }
+          });
+
+          // Inline all CSS custom property colours as hex fallbacks
+          const allEls = clonedElement.querySelectorAll<HTMLElement>('[class]');
+          allEls.forEach(el => {
+            const cs = window.getComputedStyle(el);
+            // Force background and text colour resolution
+            el.style.backgroundColor = cs.backgroundColor.includes('oklch')
+              ? '#0f0f0f' : cs.backgroundColor;
+            el.style.color = cs.color.includes('oklch')
+              ? '#e2e8f0' : cs.color;
+            el.style.borderColor = cs.borderColor.includes('oklch')
+              ? '#334155' : cs.borderColor;
+          });
         },
       });
+
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save(`SpendWise-Audit-${audit.id?.slice(-8) || 'Report'}.pdf`);
+      // Use A4-proportioned page sized to canvas so nothing is cut off
+      const pdfW = 794; // ~A4 width in px at 96dpi
+      const pdfH = Math.round((canvas.height / canvas.width) * pdfW);
+      const pdf  = new jsPDF({ orientation: pdfH > pdfW ? 'portrait' : 'landscape', unit: 'px', format: [pdfW, pdfH] });
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
+      pdf.save(`SpendWise-Audit-${audit.id?.slice(-8) ?? 'Report'}.pdf`);
     } catch (err) {
       console.error('PDF export failed', err);
       alert('PDF export failed — please try again.');
@@ -102,26 +130,40 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
     <div className="space-y-10 animate-fade-in">
       <div ref={reportRef} className="border border-slate-800 overflow-hidden">
 
-        {/* Header */}
+        {/* ── Header ──────────────────────────────────────────────── */}
         <div className="p-8 border-b border-slate-800 bg-slate-950 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
           <div>
             <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-slate-600 mb-3">
               Audit Report #{audit.id?.slice(-8).toUpperCase() ?? 'XXXXXXXX'}
             </div>
+
+            {/* Monthly savings — use correct field name */}
             <div className="font-mono font-bold tracking-tighter leading-none text-slate-100 text-7xl sm:text-8xl">
-              ${audit.totalSavingsMonthly ?? 0}
+              ${totalMonthly.toFixed(0)}
               <span className="text-2xl font-normal align-top ml-2 text-slate-500">/MO</span>
             </div>
+
+            {/* Annual savings — use correct field name */}
             <div className="font-serif italic text-slate-400 text-xl mt-3">
-              Potential Annual Savings: ${audit.totalSavingsAnnual ?? 0}
+              Potential Annual Savings: <span className="text-emerald-400">${totalAnnual.toFixed(0)}</span>
             </div>
           </div>
+
           <div className="flex gap-3 flex-shrink-0">
-            <button onClick={handleShare} className="border border-slate-700 hover:border-slate-500 p-4 flex flex-col items-center gap-1.5 transition-all">
+            <button
+              onClick={handleShare}
+              className="border border-slate-700 hover:border-slate-500 p-4 flex flex-col items-center gap-1.5 transition-all"
+            >
               <Share2 size={18} className="text-slate-400" />
-              <span className="font-mono text-[8px] uppercase tracking-widest text-slate-600">{copied ? 'Copied!' : 'Share'}</span>
+              <span className="font-mono text-[8px] uppercase tracking-widest text-slate-600">
+                {copied ? 'Copied!' : 'Share'}
+              </span>
             </button>
-            <button onClick={handleExportPDF} disabled={exporting} className="border border-slate-700 hover:border-emerald-500 p-4 flex flex-col items-center gap-1.5 transition-all disabled:opacity-40">
+            <button
+              onClick={handleExportPDF}
+              disabled={exporting}
+              className="border border-slate-700 hover:border-emerald-500 p-4 flex flex-col items-center gap-1.5 transition-all disabled:opacity-40"
+            >
               {exporting
                 ? <span className="w-[18px] h-[18px] border-2 border-slate-700 border-t-emerald-500 rounded-full animate-spin" />
                 : <Download size={18} className="text-slate-400" />}
@@ -130,74 +172,185 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
           </div>
         </div>
 
-        {/* Body */}
+        {/* ── Body ────────────────────────────────────────────────── */}
         <div className="grid md:grid-cols-3 md:divide-x md:divide-slate-800">
 
-          {/* Left: analysis + recs */}
+          {/* Left: AI analysis + per-tool findings */}
           <div className="md:col-span-2 p-8 space-y-10">
+
+            {/* AI Summary */}
             {audit.aiSummary && (
               <section>
                 <SectionLabel label="AI Analysis" />
-                <div className="font-serif italic text-slate-300 text-xl leading-snug">{audit.aiSummary}</div>
+                <div className="font-serif italic text-slate-300 text-xl leading-snug">
+                  {audit.aiSummary}
+                </div>
               </section>
             )}
 
+            {/* Recommendations — iterate audit.findings, not audit.recommendations */}
             <section>
               <SectionLabel label="Recommendations" />
-              {!audit.recommendations?.length ? (
+
+              {actionableFindings.length === 0 ? (
                 <div className="p-8 text-center border border-dashed border-slate-800">
                   <ShieldCheck size={40} className="text-emerald-500 mx-auto mb-3" />
-                  <div className="font-mono font-bold uppercase tracking-[0.2em] text-slate-200 mb-1">Optimization: Perfect</div>
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-slate-600">You're currently spending optimally for your team size.</p>
+                  <div className="font-mono font-bold uppercase tracking-[0.2em] text-slate-200 mb-1">
+                    Optimization: Perfect
+                  </div>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-slate-600">
+                    You're currently spending optimally for your team size.
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {audit.recommendations.map((rec, i) => (
-                    <div key={i} className="border border-slate-800 hover:border-slate-700 transition-all overflow-hidden">
+                  {actionableFindings.map((finding, i) => (
+                    <div
+                      key={`${finding.toolId}-${i}`}
+                      className="border border-slate-800 hover:border-slate-700 transition-all overflow-hidden"
+                    >
                       <div className="p-5 flex justify-between items-start gap-4">
-                        <div className="space-y-1.5 flex-1">
-                          <span className="inline-block font-mono text-[8px] uppercase tracking-widest bg-slate-900 border border-slate-700 text-slate-400 px-1.5 py-0.5">{rec.toolId}</span>
-                          <div className="font-mono font-bold uppercase tracking-tight text-slate-100">{rec.action}</div>
-                          <p className="font-mono text-[11px] text-slate-500 leading-relaxed">{rec.reason}</p>
+                        <div className="space-y-2 flex-1">
+                          {/* Tool badge + status */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="inline-block font-mono text-[8px] uppercase tracking-widest bg-slate-900 border border-slate-700 text-slate-400 px-1.5 py-0.5">
+                              {finding.toolName}
+                            </span>
+                            <StatusBadge status={finding.status} />
+                            <span className="font-mono text-[8px] text-slate-600">
+                              Current: {finding.currentPlan} · ${finding.currentSpend}/mo
+                            </span>
+                          </div>
+
+                          {/* Recommendation headline */}
+                          <div className="font-mono font-bold uppercase tracking-tight text-slate-100 text-sm">
+                            {finding.recommendation}
+                          </div>
+
+                          {/* Detailed reasoning */}
+                          <p className="font-mono text-[11px] text-slate-500 leading-relaxed">
+                            {finding.reason}
+                          </p>
+
+                          {/* Alternative tool link if present */}
+                          {finding.alternativeTool && finding.alternativeToolUrl && (
+                            <a
+                              href={finding.alternativeToolUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-widest text-brand-400 hover:text-brand-300 border-b border-brand-400/30 hover:border-brand-300 transition-colors"
+                            >
+                              Switch to {finding.alternativeTool} <ArrowRight size={9} />
+                            </a>
+                          )}
+
+                          {/* Credex badge */}
+                          {finding.credexApplicable && (
+                            <div className="inline-flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-widest text-emerald-500 border border-emerald-900/50 bg-emerald-950/20 px-2 py-1">
+                              <Info size={8} /> Credex credits applicable
+                            </div>
+                          )}
                         </div>
-                        <div className="text-right flex-shrink-0">
-                          <div className="font-mono font-bold text-emerald-400 text-lg">-${rec.savingsMonthly}/mo</div>
-                          <div className="font-mono text-[8px] uppercase tracking-widest text-slate-700">${(rec.savingsMonthly ?? 0) * 12}/yr</div>
-                        </div>
+
+                        {/* Savings column */}
+                        {finding.monthlySavings > 0 && (
+                          <div className="text-right flex-shrink-0">
+                            <div className="font-mono font-bold text-emerald-400 text-lg">
+                              -${finding.monthlySavings.toFixed(0)}/mo
+                            </div>
+                            <div className="font-mono text-[8px] uppercase tracking-widest text-slate-700">
+                              ${finding.annualSavings.toFixed(0)}/yr
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <DefensibleMatrix rec={rec} />
                     </div>
                   ))}
                 </div>
               )}
             </section>
+
+            {/* All-tools summary table */}
+            {(audit.findings ?? []).length > 0 && (
+              <section>
+                <SectionLabel label="Full Stack Overview" />
+                <div className="border border-slate-800 overflow-hidden">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-slate-800 bg-slate-950">
+                        {['Tool', 'Plan', 'Monthly Spend', 'Status', 'Savings'].map(h => (
+                          <th key={h} className="font-mono text-[7px] uppercase tracking-[0.2em] text-slate-700 px-3 py-2">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(audit.findings ?? []).map((f, i) => (
+                        <tr key={i} className="border-b border-slate-800/50 hover:bg-slate-900/30 transition-colors">
+                          <td className="font-mono text-[10px] text-slate-300 px-3 py-2">{f.toolName}</td>
+                          <td className="font-mono text-[10px] text-slate-500 px-3 py-2">{f.currentPlan}</td>
+                          <td className="font-mono text-[10px] text-slate-400 px-3 py-2">${f.currentSpend}/mo</td>
+                          <td className="px-3 py-2"><StatusBadge status={f.status} /></td>
+                          <td className="font-mono text-[10px] px-3 py-2">
+                            {f.monthlySavings > 0
+                              ? <span className="text-emerald-400">-${f.monthlySavings.toFixed(0)}/mo</span>
+                              : <span className="text-slate-700">—</span>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
           </div>
 
-          {/* Right: sidebar */}
+          {/* ── Right sidebar ───────────────────────────────────── */}
           <div className="p-8 bg-slate-950/60 space-y-10">
             <section>
               <SectionLabel label="Next Steps" />
-              {(audit.totalSavingsMonthly ?? 0) > 500 ? (
+              {totalMonthly > 500 ? (
                 <div className="border border-slate-700 bg-slate-900 p-6 space-y-4">
-                  <div className="font-mono font-bold uppercase tracking-tight text-slate-100 text-lg leading-tight">High Savings<br />Detected.</div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-slate-600 leading-relaxed">Our engineers at Credex can manually audit your cloud and AI spend to save you 25% or more.</p>
-                  <a href="https://credex.rocks" target="_blank" rel="noopener noreferrer"
-                    className="w-full bg-emerald-500 text-black font-mono font-bold uppercase tracking-[0.2em] text-[10px] p-3 flex items-center justify-center gap-2 hover:bg-emerald-400 transition-colors">
+                  <div className="font-mono font-bold uppercase tracking-tight text-slate-100 text-lg leading-tight">
+                    High Savings<br />Detected.
+                  </div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-slate-600 leading-relaxed">
+                    Our engineers at Credex can manually audit your cloud and AI spend to save you 25% or more.
+                  </p>
+                  <a
+                    href="https://credex.rocks"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-emerald-500 text-black font-mono font-bold uppercase tracking-[0.2em] text-[10px] p-3 flex items-center justify-center gap-2 hover:bg-emerald-400 transition-colors"
+                  >
                     Book Consultation <ArrowRight size={12} />
                   </a>
                 </div>
               ) : (
                 <div className="border border-slate-800 p-6 space-y-4">
-                  <div className="font-mono font-bold uppercase tracking-tight text-slate-100 text-lg leading-tight">Stay<br />Optimized.</div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-slate-600 leading-relaxed">Monthly delta-reports when price drops or new tool combos beat your current ROI.</p>
+                  <div className="font-mono font-bold uppercase tracking-tight text-slate-100 text-lg leading-tight">
+                    Stay<br />Optimized.
+                  </div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-slate-600 leading-relaxed">
+                    Monthly delta-reports when price drops or new tool combos beat your current ROI.
+                  </p>
                   {subscribed ? (
-                    <div className="font-mono text-[9px] uppercase tracking-widest text-emerald-500 border border-emerald-900 bg-emerald-950/30 p-3 text-center">✓ Subscribed</div>
+                    <div className="font-mono text-[9px] uppercase tracking-widest text-emerald-500 border border-emerald-900 bg-emerald-950/30 p-3 text-center">
+                      ✓ Subscribed
+                    </div>
                   ) : (
                     <div className="space-y-2">
-                      <input type="email" placeholder="EMAIL ADDRESS" value={email} onChange={e => setEmail(e.target.value)}
-                        className="w-full bg-transparent border-b border-slate-700 focus:border-emerald-500 pb-1.5 font-mono text-xs text-slate-300 focus:outline-none transition-colors placeholder:text-slate-700" />
-                      <button type="button" onClick={() => email && setSubscribed(true)}
-                        className="w-full bg-slate-900 border border-slate-700 hover:border-emerald-500 text-slate-400 hover:text-emerald-400 font-mono text-[9px] uppercase tracking-[0.2em] p-3 transition-colors">
+                      <input
+                        type="email"
+                        placeholder="EMAIL ADDRESS"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        className="w-full bg-transparent border-b border-slate-700 focus:border-emerald-500 pb-1.5 font-mono text-xs text-slate-300 focus:outline-none transition-colors placeholder:text-slate-700"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => email && setSubscribed(true)}
+                        className="w-full bg-slate-900 border border-slate-700 hover:border-emerald-500 text-slate-400 hover:text-emerald-400 font-mono text-[9px] uppercase tracking-[0.2em] p-3 transition-colors"
+                      >
                         Subscribe
                       </button>
                     </div>
@@ -206,12 +359,14 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
               )}
             </section>
 
+            {/* Audit metadata */}
             <section className="space-y-0">
               {[
-                ['Data Verified', new Date().toISOString().split('T')[0]],
-                ['Audit Engine', 'v1.2.0-beta'],
-                ['Rules Run', '12'],
-                ['Audit ID', audit.id?.slice(-8).toUpperCase() ?? '—'],
+                ['Data Verified',   new Date().toISOString().split('T')[0]],
+                ['Audit Engine',    'v1.2.0-beta'],
+                ['Tools Audited',   String(audit.findings?.length ?? 0)],
+                ['Issues Found',    String(actionableFindings.length)],
+                ['Audit ID',        audit.id?.slice(-8).toUpperCase() ?? '—'],
               ].map(([k, v]) => (
                 <div key={k} className="flex justify-between items-center border-b border-slate-800/50 py-1.5">
                   <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-slate-700">{k}</span>
@@ -223,14 +378,18 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
         </div>
       </div>
 
-      {/* Bottom actions */}
+      {/* ── Bottom actions ───────────────────────────────────────── */}
       <div className="flex justify-center gap-4">
-        <button onClick={onStartOver}
-          className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] border border-slate-800 hover:border-slate-600 hover:text-slate-300 text-slate-600 px-6 py-3 transition-all">
+        <button
+          onClick={onStartOver}
+          className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] border border-slate-800 hover:border-slate-600 hover:text-slate-300 text-slate-600 px-6 py-3 transition-all"
+        >
           <RotateCcw size={12} /> New Audit
         </button>
-        <button onClick={handleShare}
-          className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] border border-slate-800 hover:border-emerald-500 hover:text-emerald-400 text-slate-600 px-6 py-3 transition-all">
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] border border-slate-800 hover:border-emerald-500 hover:text-emerald-400 text-slate-600 px-6 py-3 transition-all"
+        >
           <Share2 size={12} /> {copied ? 'Copied!' : 'Share Report'}
         </button>
       </div>

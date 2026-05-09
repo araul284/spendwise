@@ -46,21 +46,21 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col">
+    <div className="min-h-screen bg-slate-100 text-black flex flex-col">
 
       {/* ── Nav ───────────────────────────────────────── */}
       <nav
-        className="sticky top-0 z-50 border-b border-black bg-white/90"
+        className="sticky top-0 z-50 border-b border-black bg-slate-100/90"
         style={{ backdropFilter: 'blur(16px)' }}
       >
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <TrendingDown size={18} className="text-brand-400" />
-            <span className="font-mono font-bold text-black uppercase tracking-[0.08em]">SpendWise.</span>
+            <TrendingDown size={22} className="text-black" />
+            <span className="font-mono font-bold text-[20px] text-black uppercase tracking-tighter">SpendWise.</span>
             <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-black hidden sm:inline ml-1">AI spend auditor</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="font-mono text-[9px] uppercase tracking-widest bg-white-700 border border-black text-black px-2 py-0.5">v1.0.0</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest bg-black border text-slate-100 px-2 py-0.5 rounded">v1.0.0</span>
           </div>
         </div>
       </nav>
@@ -81,11 +81,11 @@ export default function HomePage() {
               </div>
 
               {/* Editorial headline — mix of display weights + serif italic */}
-              <h1 className="font-mono font-bold uppercase tracking-tighter leading-[0.88] text-5xl sm:text-7xl text-black mb-6">
+              <h1 className="font-sans font-bold uppercase tracking-tighter leading-[0.88] text-6xl sm:text-7xl text-black mb-6">
                 Stop<br />
                 <span className="font-serif italic font-light normal-case"
                   style={{
-                    WebkitTextStroke: '1.2px rgba(0, 0, 0, 0.8)',
+                    WebkitTextStroke: '1px rgba(0, 0, 0, 0.8)',
                     color: 'transparent'
                   }}
                   >
@@ -103,7 +103,7 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-6 text-[10px] font-mono uppercase tracking-[0.18em] text-slate-700">
                 {FEATURES.map(({ icon: Icon, label, desc }) => (
                   <div key={label} className="flex items-center gap-2">
-                    <Icon size={12} className="text-brand-600" />
+                    <Icon size={12} className="text-black" />
                     <span className="opacity-100">{label}</span>
                     <span className="opacity-90">— {desc}</span>
                   </div>
@@ -132,10 +132,10 @@ export default function HomePage() {
             </div>
 
             <div className="text-center">
-              <h2 className="font-mono font-bold uppercase tracking-[0.15em] text-slate-100 text-lg mb-1">
+              <h2 className="font-mono font-bold uppercase tracking-[0.15em] text-black text-lg mb-1">
                 Decrypting Spend
               </h2>
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-700">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-black">
                 Running audit rules across your stack…
               </p>
             </div>
@@ -173,14 +173,12 @@ export default function HomePage() {
       <footer className="border-t border-slate-800 py-6 mt-auto">
         <div className="max-w-3xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-700">
-            SpendWise © 2026 / Precision Financial Audit / Built for{' '}
-            <a href="https://credex.rocks" target="_blank" rel="noopener noreferrer" className="hover:text-slate-500 transition-colors">
-              Credex
-            </a>
+            <a href="https://github.com/araul284/credex-ai.git" target="_blank" rel="noopener noreferrer" className="hover:text-slate-500 transition-colors">
+              SpendWise
+            </a> © 2026 / Precision Financial Audit
           </span>
           <div className="flex items-center gap-6 font-mono text-[9px] uppercase tracking-[0.2em] text-slate-700">
             <a href="/audit/demo" className="hover:text-slate-400 transition-colors">Sample audit</a>
-            <a href="https://credex.rocks" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">About Credex</a>
           </div>
         </div>
       </footer>

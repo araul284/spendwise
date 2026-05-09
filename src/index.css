@@ -1,8 +1,78 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:ital,wght@1,300&family=JetBrains+Mono:wght@400;700&display=swap');
+/* ─────────────────────────────────────────────────────────────
+   SpendWise — Dark editorial design system
+   Base: dark glass-card emerald SaaS
+   + Brutalist/Swiss-grid editorial tokens from SpendFocus
+   ───────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* Typography */
+  --font-sans:    "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    "DM Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-serif:   "DM Serif Display", Georgia, serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand — emerald */
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-800: #065f46;
+  --color-brand-950: #022c22;
+
+  /* Surface */
+  --color-surface:        #000000;
+  --color-surface-muted:  #0a0a0a;
+  --color-surface-border: #1e293b;
 }
+
+/* ── Base reset ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background: #000;
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Legacy glass-card (kept for shared pages) ── */
+.glass-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  border-radius: 0; /* Flat — editorial */
+  backdrop-filter: blur(12px);
+}
+
+/* ── Serif italic display (editorial hero) ── */
+.font-serif { font-family: var(--font-serif); }
+.font-mono  { font-family: var(--font-mono); }
+
+/* ── Text-stroke dark (hollow headline) ── */
+.text-stroke-dark {
+  -webkit-text-stroke: 1.5px rgba(0, 0, 0, 1);
+  color: transparent;
+}
+
+/* ── Select / input resets for editorial bare style ── */
+select, input[type="number"], input[type="text"], input[type="email"] {
+  appearance: none;
+}
+
+/* ── Animations ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-fade-up  { animation: fade-up  0.4s ease forwards; }
+.animate-fade-in  { animation: fade-in  0.35s ease forwards; }
+
+/* ── Spin utility (for loaders) ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.animate-spin { animation: spin 1s linear infinite; }

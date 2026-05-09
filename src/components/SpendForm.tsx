@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, ChevronRight, Sparkles, Info, Users, Calculator } from 'lucide-react';
+import { Trash2, ChevronRight, Sparkles, Users, Calculator } from 'lucide-react';
 import type { AuditInput, ToolEntry, UseCase, ToolId } from '../types';
 import { TOOLS } from '../data/tools';
 
 const USE_CASES: { value: UseCase; label: string; desc: string }[] = [
-  { value: 'coding', label: 'Coding', desc: 'Building software, code review' },
-  { value: 'writing', label: 'Writing', desc: 'Content, docs, copy' },
-  { value: 'data', label: 'Data', desc: 'Analysis, research, SQL' },
+  { value: 'coding',   label: 'Coding',   desc: 'Building software, code review' },
+  { value: 'writing',  label: 'Writing',  desc: 'Content, docs, copy' },
+  { value: 'data',     label: 'Data',     desc: 'Analysis, research, SQL' },
   { value: 'research', label: 'Research', desc: 'Synthesis, summarisation' },
-  { value: 'mixed', label: 'Mixed', desc: 'Multiple workflows' },
+  { value: 'mixed',    label: 'Mixed',    desc: 'Multiple workflows' },
 ];
 
-const TEAM_PRESETS = [1, 5, 10, 25, 50] as const;
+const TEAM_SIZE_PRESETS = [
+  { label: 'Solo', value: 1 },
+  { label: '5',    value: 5 },
+  { label: '10',   value: 10 },
+  { label: '25',   value: 25 },
+  { label: '50+',  value: 50 },
+];
 
 const STORAGE_KEY = 'sw_form_state';
 
@@ -20,117 +26,124 @@ interface SpendFormProps {
   isLoading?: boolean;
 }
 
+/* ── Section label: mono uppercase with ruled line ── */
+function SectionLabel({ number, icon: Icon, label }: { number: string; icon: React.ElementType; label: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-5">
+      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">{number}.</span>
+      <Icon size={11} className="text-slate-600" />
+      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">{label}</span>
+      <div className="flex-1 h-px bg-slate-800 ml-1" />
+    </div>
+  );
+}
+
+/* ── Single tool row with editorial serif-italic plan selector ── */
 function ToolRow({
-  entry,
-  index,
-  onChange,
-  onRemove,
+  entry, index, onChange, onRemove,
 }: {
-  entry: ToolEntry;
-  index: number;
-  onChange: (e: ToolEntry) => void;
-  onRemove: () => void;
+  entry: ToolEntry; index: number;
+  onChange: (e: ToolEntry) => void; onRemove: () => void;
 }) {
   const tool = TOOLS.find(t => t.id === entry.toolId)!;
   const plans = tool.plans;
   const currentPlan = plans.find(p => p.id === entry.plan);
   const estimatedCost =
-    entry.monthlySpend > 0
-      ? entry.monthlySpend
-      : currentPlan
-      ? (currentPlan.flatPrice ?? currentPlan.pricePerSeat * entry.seats)
-      : 0;
+    entry.monthlySpend > 0 ? entry.monthlySpend
+    : currentPlan ? (currentPlan.flatPrice ?? currentPlan.pricePerSeat * entry.seats) : 0;
 
   return (
     <div
-      className="border border-surface-border bg-surface-muted animate-fade-up"
+      className="border-b border-slate-800/80 py-4 animate-fade-up"
       style={{ animationDelay: `${index * 60}ms`, animationFillMode: 'both', opacity: 0 }}
     >
-      {/* Tool header strip */}
-      <div
-        className="flex items-center justify-between px-4 py-2.5 border-b border-surface-border"
-        style={{ background: `${tool.color}0a` }}
-      >
-        <div className="flex items-center gap-2.5">
-          <span className="text-base" style={{ color: tool.color }}>{tool.logo}</span>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-slate-400">{tool.name}</span>
-        </div>
-        <button
-          onClick={onRemove}
-          className="text-slate-700 hover:text-red-400 transition-colors p-1"
-          aria-label="Remove tool"
+      <div className="flex items-start gap-4">
+        {/* Tool icon */}
+        <div
+          className="w-9 h-9 flex items-center justify-center text-base flex-shrink-0 mt-0.5"
+          style={{ background: `${tool.color}12`, color: tool.color, border: `1px solid ${tool.color}25` }}
         >
-          <Trash2 size={13} />
-        </button>
-      </div>
-
-      <div className="p-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {/* Plan */}
-        <div className="col-span-2 sm:col-span-1">
-          <label className="block text-[9px] uppercase font-mono tracking-widest text-slate-600 mb-1.5">Plan</label>
-          <select
-            className="select-field text-sm font-mono"
-            value={entry.plan}
-            onChange={e => onChange({ ...entry, plan: e.target.value })}
-          >
-            {plans.map(p => (
-              <option key={p.id} value={p.id}>
-                {p.name}{p.pricePerSeat > 0 ? ` — $${p.pricePerSeat}/seat` : p.flatPrice ? ` — $${p.flatPrice}/mo` : ' — Custom'}
-              </option>
-            ))}
-          </select>
+          {tool.logo}
         </div>
 
-        {/* Seats */}
-        {!['anthropic_api', 'openai_api'].includes(entry.toolId) && (
-          <div>
-            <label className="block text-[9px] uppercase font-mono tracking-widest text-slate-600 mb-1.5">Seats</label>
-            <input
-              type="number"
-              min={1}
-              max={9999}
-              className="input-field text-sm font-mono"
-              value={entry.seats}
-              onChange={e => onChange({ ...entry, seats: Math.max(1, parseInt(e.target.value) || 1) })}
-            />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-400">{tool.name}</span>
+              {estimatedCost > 0 && (
+                <span className="font-mono text-[9px] text-brand-500 tracking-widest">${estimatedCost}/mo</span>
+              )}
+            </div>
+            <button onClick={onRemove} className="text-slate-700 hover:text-red-400 transition-colors p-1" aria-label="Remove tool">
+              <Trash2 size={13} />
+            </button>
           </div>
-        )}
 
-        {/* Monthly spend override */}
-        <div>
-          <label className="block text-[9px] uppercase font-mono tracking-widest text-slate-600 mb-1.5">
-            {['anthropic_api', 'openai_api'].includes(entry.toolId) ? 'Monthly spend ($)' : 'Override ($)'}
-          </label>
-          <input
-            type="number"
-            min={0}
-            placeholder={estimatedCost > 0 ? `~$${estimatedCost}` : '0'}
-            className="input-field text-sm font-mono"
-            value={entry.monthlySpend || ''}
-            onChange={e => onChange({ ...entry, monthlySpend: parseFloat(e.target.value) || 0 })}
-          />
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {/* Plan — serif italic (editorial touch) */}
+            <div className="col-span-2 sm:col-span-1">
+              <label className="block font-mono text-[8px] uppercase tracking-[0.18em] text-slate-600 mb-1.5">Plan</label>
+              <select
+                className="w-full bg-transparent border-b border-slate-700 pb-1 font-serif italic text-base text-slate-200 focus:outline-none focus:border-brand-500 transition-colors cursor-pointer"
+                value={entry.plan}
+                onChange={e => onChange({ ...entry, plan: e.target.value })}
+              >
+                {plans.map(p => (
+                  <option key={p.id} value={p.id} className="bg-slate-900 not-italic font-sans text-sm">
+                    {p.name}{p.pricePerSeat > 0 ? ` — $${p.pricePerSeat}/seat` : p.flatPrice ? ` — $${p.flatPrice}/mo` : ' — Custom'}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Seats */}
+            {!['anthropic_api', 'openai_api'].includes(entry.toolId) && (
+              <div>
+                <label className="block font-mono text-[8px] uppercase tracking-[0.18em] text-slate-600 mb-1.5">Seats</label>
+                <div className="relative">
+                  <input
+                    type="number" min={1} max={9999}
+                    className="w-full bg-transparent border-b border-slate-700 pb-1 font-mono text-base text-slate-200 focus:outline-none focus:border-brand-500 transition-colors pr-8"
+                    value={entry.seats}
+                    onChange={e => onChange({ ...entry, seats: Math.max(1, parseInt(e.target.value) || 1) })}
+                  />
+                  <span className="absolute right-0 top-0 font-mono text-[7px] uppercase tracking-widest text-slate-700">ppl</span>
+                </div>
+              </div>
+            )}
+
+            {/* Monthly spend override */}
+            <div>
+              <label className="block font-mono text-[8px] uppercase tracking-[0.18em] text-slate-600 mb-1.5">
+                {['anthropic_api', 'openai_api'].includes(entry.toolId) ? 'Monthly $' : 'Override $'}
+              </label>
+              <div className="relative">
+                <span className="absolute left-0 top-0 font-mono text-[9px] text-slate-600">$</span>
+                <input
+                  type="number" min={0}
+                  placeholder={estimatedCost > 0 ? `~${estimatedCost}` : '0'}
+                  className="w-full bg-transparent border-b border-slate-700 pb-1 font-mono text-base text-slate-200 focus:outline-none focus:border-brand-500 transition-colors pl-3"
+                  value={entry.monthlySpend || ''}
+                  onChange={e => onChange({ ...entry, monthlySpend: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      {estimatedCost > 0 && (
-        <div className="px-4 pb-3 flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-[10px] text-slate-600 font-mono">
-            <Info size={11} />
-            <span>Est. cost</span>
-          </div>
-          <span className="font-mono text-brand-400 text-sm font-bold">${estimatedCost}/mo</span>
-        </div>
-      )}
     </div>
   );
 }
 
+/* ══════════════════════════════════════════════════
+   SpendForm — main export
+══════════════════════════════════════════════════ */
 export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
   const [teamSize, setTeamSize] = useState(5);
   const [useCase, setUseCase] = useState<UseCase>('mixed');
   const [tools, setTools] = useState<ToolEntry[]>([]);
-  const [addingTool, setAddingTool] = useState(false);
 
+  /* Persistence */
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -152,11 +165,7 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
   function addTool(toolId: ToolId) {
     const tool = TOOLS.find(t => t.id === toolId)!;
     const defaultPlan = tool.plans[tool.plans.length > 1 ? 1 : 0];
-    setTools(prev => [
-      ...prev,
-      { toolId, plan: defaultPlan.id, seats: teamSize, monthlySpend: 0 },
-    ]);
-    setAddingTool(false);
+    setTools(prev => [...prev, { toolId, plan: defaultPlan.id, seats: teamSize, monthlySpend: 0 }]);
   }
 
   function updateTool(index: number, entry: ToolEntry) {
@@ -177,67 +186,62 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
     const tool = TOOLS.find(td => td.id === t.toolId);
     const plan = tool?.plans.find(p => p.id === t.plan);
     if (!plan) return sum;
-    const cost = t.monthlySpend || plan.flatPrice || plan.pricePerSeat * t.seats;
-    return sum + cost;
+    return sum + (t.monthlySpend || plan.flatPrice || plan.pricePerSeat * t.seats);
   }, 0);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Team context */}
-      <div className="border border-surface-border bg-surface-muted/40">
-        {/* Section label — brutalist mono header */}
-        <div className="flex items-center gap-2 px-5 py-3 border-b border-surface-border">
-          <Users size={12} className="text-slate-600" />
-          <span className="font-mono text-[10px] uppercase tracking-widest text-slate-600">01. Context</span>
-        </div>
 
-        <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
+      {/* ── 01. Context ─────────────────────────────── */}
+      <div className="border border-slate-800 bg-slate-950/50 p-6">
+        <SectionLabel number="01" icon={Users} label="Context" />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
           {/* Team size with quick-select presets */}
           <div>
-            <label className="block text-[9px] uppercase font-mono tracking-widest text-slate-500 mb-2">Team Size</label>
-            {/* Quick-select preset buttons */}
+            <label className="block font-mono text-[9px] uppercase tracking-[0.2em] text-slate-500 mb-2.5">Team Size</label>
+            {/* Quick-select pill buttons */}
             <div className="flex gap-1 mb-2">
-              {TEAM_PRESETS.map(size => (
+              {TEAM_SIZE_PRESETS.map(preset => (
                 <button
-                  key={size}
+                  key={preset.value}
                   type="button"
-                  onClick={() => setTeamSize(size)}
-                  className="flex-1 py-1.5 text-[9px] font-mono border transition-all duration-150"
-                  style={{
-                    borderColor: teamSize === size ? 'rgba(16,185,129,0.6)' : 'rgba(255,255,255,0.08)',
-                    background: teamSize === size ? 'rgba(16,185,129,0.12)' : 'transparent',
-                    color: teamSize === size ? '#10b981' : '#64748b',
-                  }}
+                  onClick={() => setTeamSize(preset.value)}
+                  className={`flex-1 py-1.5 font-mono text-[9px] uppercase tracking-widest border transition-all duration-150 ${
+                    teamSize === preset.value
+                      ? 'bg-brand-500 border-brand-500 text-black font-bold'
+                      : 'border-slate-800 text-slate-600 hover:border-slate-600 hover:text-slate-300 bg-transparent'
+                  }`}
                 >
-                  {size === 1 ? 'Solo' : size === 50 ? '50+' : size}
+                  {preset.label}
                 </button>
               ))}
             </div>
+            {/* Manual input */}
             <div className="relative">
               <input
-                type="number"
-                min={1}
-                max={9999}
-                className="input-field font-mono pr-14"
+                type="number" min={1} max={9999}
+                className="w-full bg-transparent border border-slate-800 focus:border-brand-500 p-2 font-mono text-sm text-slate-200 focus:outline-none transition-colors pr-14"
                 value={teamSize}
                 onChange={e => setTeamSize(Math.max(1, parseInt(e.target.value) || 1))}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-mono text-slate-600 uppercase">Seats</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[8px] uppercase tracking-widest text-slate-700">Seats</span>
             </div>
           </div>
 
           {/* Use case */}
           <div>
-            <label className="block text-[9px] uppercase font-mono tracking-widest text-slate-500 mb-2">Primary Use Case</label>
-            {/* Empty row to align with preset buttons */}
+            <label className="block font-mono text-[9px] uppercase tracking-[0.2em] text-slate-500 mb-2.5">Use Case</label>
+            {/* Invisible spacer to align with preset row above */}
             <div className="mb-2 h-[30px]" />
             <select
-              className="select-field font-mono"
+              className="w-full bg-transparent border border-slate-800 focus:border-brand-500 p-2 font-mono text-sm text-slate-200 focus:outline-none transition-colors cursor-pointer h-[38px]"
               value={useCase}
               onChange={e => setUseCase(e.target.value as UseCase)}
             >
               {USE_CASES.map(uc => (
-                <option key={uc.value} value={uc.value}>
+                <option key={uc.value} value={uc.value} className="bg-slate-900">
                   {uc.label} — {uc.desc}
                 </option>
               ))}
@@ -246,84 +250,73 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
         </div>
       </div>
 
-      {/* Tool list */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 mb-1">
-          <Calculator size={12} className="text-slate-600" />
-          <span className="font-mono text-[10px] uppercase tracking-widest text-slate-600">02. Tool Stack</span>
+      {/* ── 02. Tool Stack ──────────────────────────── */}
+      <div className="border border-slate-800 bg-slate-950/50 p-6">
+
+        <div className="flex items-start justify-between">
+          <SectionLabel number="02" icon={Calculator} label="Tool Stack" />
           {totalEstimated > 0 && (
-            <span className="ml-auto font-mono text-brand-400 font-bold text-sm">${totalEstimated.toFixed(0)}/mo total</span>
+            <div className="text-right flex-shrink-0 -mt-1 ml-4">
+              <div className="font-mono text-[8px] uppercase tracking-[0.2em] text-slate-600 mb-0.5">Est. Total/Mo</div>
+              <div className="font-mono text-brand-400 font-bold text-xl">${totalEstimated.toFixed(0)}</div>
+            </div>
           )}
         </div>
 
-        {tools.length === 0 && !addingTool && (
-          <div className="border border-dashed border-surface-border p-10 text-center">
-            <p className="font-mono text-[11px] uppercase tracking-widest text-slate-600 italic">
-              No tools selected. Add the AI tools your team pays for.
-            </p>
-          </div>
-        )}
-
-        {tools.map((entry, i) => (
-          <ToolRow
-            key={`${entry.toolId}-${i}`}
-            entry={entry}
-            index={i}
-            onChange={e => updateTool(i, e)}
-            onRemove={() => removeTool(i)}
-          />
-        ))}
-
-        {/* Add tool */}
-        {!addingTool ? (
-          <button
-            type="button"
-            onClick={() => setAddingTool(true)}
-            disabled={availableTools.length === 0}
-            className="btn-ghost w-full justify-center py-3 border-dashed disabled:opacity-40 disabled:cursor-not-allowed font-mono text-xs uppercase tracking-widest"
-          >
-            <Plus size={14} />
-            Add a tool {availableTools.length > 0 ? `(${availableTools.length} available)` : '(all added)'}
-          </button>
-        ) : (
-          <div className="border border-surface-border bg-surface-muted/40 p-4">
-            <p className="text-[9px] font-mono uppercase tracking-widest text-slate-600 mb-3">Select a tool to add</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-              {availableTools.map(tool => (
-                <button
-                  key={tool.id}
-                  type="button"
-                  onClick={() => addTool(tool.id)}
-                  className="flex items-center gap-2 px-3 py-2 border border-surface-border hover:border-brand-500/40 text-slate-400 hover:text-slate-100 transition-all duration-150 text-left"
-                  style={{ background: 'transparent' }}
-                >
-                  <span style={{ color: tool.color }}>{tool.logo}</span>
-                  <span className="font-mono text-[10px] uppercase tracking-wider">{tool.name}</span>
-                </button>
-              ))}
+        {/* Tool toggle grid — click to add, click ✕ to remove */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 mb-6">
+          {TOOLS.map(tool => {
+            const isAdded = tools.some(te => te.toolId === tool.id);
+            return (
               <button
+                key={tool.id}
                 type="button"
-                onClick={() => setAddingTool(false)}
-                className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-slate-400 text-[10px] font-mono uppercase tracking-wider transition-colors"
+                onClick={() => isAdded ? removeTool(tools.findIndex(te => te.toolId === tool.id)) : addTool(tool.id as ToolId)}
+                className={`p-2.5 border font-mono text-[9px] uppercase tracking-[0.08em] transition-all duration-150 text-left flex items-center gap-1.5 ${
+                  isAdded
+                    ? 'border-brand-500/50 text-brand-400 bg-brand-500/8'
+                    : 'border-slate-800 text-slate-600 hover:border-slate-600 hover:text-slate-300 bg-transparent'
+                }`}
               >
-                Cancel
+                <span className="text-sm" style={{ color: isAdded ? undefined : tool.color }}>{tool.logo}</span>
+                <span className="truncate">{tool.name}</span>
+                {isAdded && <span className="ml-auto text-[8px] text-brand-500">✓</span>}
               </button>
-            </div>
+            );
+          })}
+        </div>
+
+        {/* Tool detail rows */}
+        {tools.length === 0 ? (
+          <div className="py-10 text-center border border-dashed border-slate-800">
+            <p className="font-serif italic text-slate-600 text-lg">No tools selected. Use the grid above to start.</p>
+          </div>
+        ) : (
+          <div>
+            {tools.map((entry, i) => (
+              <ToolRow
+                key={`${entry.toolId}-${i}`}
+                entry={entry}
+                index={i}
+                onChange={e => updateTool(i, e)}
+                onRemove={() => removeTool(i)}
+              />
+            ))}
           </div>
         )}
       </div>
 
-      {/* Submit */}
+      {/* ── Submit ──────────────────────────────────── */}
       <div className="flex flex-col items-center gap-3">
         <button
           type="submit"
           disabled={tools.length === 0 || isLoading}
-          className="btn-primary w-full sm:w-auto sm:px-10 py-4 text-sm justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none font-mono uppercase tracking-widest"
+          className="w-full bg-brand-500 text-black font-mono font-bold uppercase tracking-[0.2em] p-4 text-sm flex items-center justify-center gap-3 hover:bg-brand-400 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Decrypting spend…
+              <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+              Decrypting Spend...
             </>
           ) : (
             <>
@@ -333,7 +326,9 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
             </>
           )}
         </button>
-        <p className="text-[10px] font-mono text-slate-700 uppercase tracking-widest">Free · No account required · Results in seconds</p>
+        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-700">
+          Free · No account required · Results in seconds
+        </p>
       </div>
     </form>
   );

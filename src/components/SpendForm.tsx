@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, ChevronRight, Sparkles, Users, Calculator } from 'lucide-react';
+import { Trash2, ArrowRight, Users, Calculator } from 'lucide-react';
 import type { AuditInput, ToolEntry, UseCase, ToolId } from '../types';
 import { TOOLS } from '../data/tools';
 
@@ -58,14 +58,6 @@ function ToolRow({
       style={{ animationDelay: `${index * 60}ms`, animationFillMode: 'both', opacity: 0 }}
     >
       <div className="flex items-start gap-4">
-        {/* Tool icon */}
-        <div
-          className="w-9 h-9 flex items-center justify-center text-base flex-shrink-0 mt-0.5"
-          style={{ background: `${tool.color}12`, color: tool.color, border: `1px solid ${tool.color}25` }}
-        >
-          {tool.logo}
-        </div>
-
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
@@ -84,12 +76,12 @@ function ToolRow({
             <div className="col-span-2 sm:col-span-1">
               <label className="block font-mono text-[8px] uppercase tracking-[0.18em] text-slate-600 mb-1.5">Plan</label>
               <select
-                className="w-full bg-transparent border-b border-slate-700 pb-1 font-serif italic text-base text-slate-200 focus:outline-none focus:border-brand-500 transition-colors cursor-pointer"
+                className="w-full bg-transparent border-b border-slate-700 pb-1 font-serif italic text-base text-black focus:outline-none focus:border-slate-600 transition-colors cursor-pointer"
                 value={entry.plan}
                 onChange={e => onChange({ ...entry, plan: e.target.value })}
               >
                 {plans.map(p => (
-                  <option key={p.id} value={p.id} className="bg-slate-900 not-italic font-sans text-sm">
+                  <option key={p.id} value={p.id} className="bg-white italic font-serif text-sm">
                     {p.name}{p.pricePerSeat > 0 ? ` — $${p.pricePerSeat}/seat` : p.flatPrice ? ` — $${p.flatPrice}/mo` : ' — Custom'}
                   </option>
                 ))}
@@ -103,7 +95,7 @@ function ToolRow({
                 <div className="relative">
                   <input
                     type="number" min={1} max={9999}
-                    className="w-full bg-transparent border-b border-slate-700 pb-1 font-mono text-base text-slate-200 focus:outline-none focus:border-brand-500 transition-colors pr-8"
+                    className="w-full bg-transparent border-b border-slate-700 pb-1 font-mono text-base text-black focus:outline-none focus:border-slate-600 transition-colors pr-8"
                     value={entry.seats}
                     onChange={e => onChange({ ...entry, seats: Math.max(1, parseInt(e.target.value) || 1) })}
                   />
@@ -122,7 +114,7 @@ function ToolRow({
                 <input
                   type="number" min={0}
                   placeholder={estimatedCost > 0 ? `~${estimatedCost}` : '0'}
-                  className="w-full bg-transparent border-b border-slate-700 pb-1 font-mono text-base text-slate-200 focus:outline-none focus:border-brand-500 transition-colors pl-3"
+                  className="w-full bg-transparent border-b border-slate-700 pb-1 font-mono text-base text-black focus:outline-none focus:border-brand-500 transition-colors pl-3"
                   value={entry.monthlySpend || ''}
                   onChange={e => onChange({ ...entry, monthlySpend: parseFloat(e.target.value) || 0 })}
                 />
@@ -193,7 +185,7 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
     <form onSubmit={handleSubmit} className="space-y-8">
 
       {/* ── 01. Context ─────────────────────────────── */}
-      <div className="border border-slate-800 bg-slate-950/50 p-6">
+      <div className="border border-slate-800 bg-slate-50 p-6 rounded">
         <SectionLabel number="01" icon={Users} label="Context" />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -210,8 +202,8 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
                   onClick={() => setTeamSize(preset.value)}
                   className={`flex-1 py-1.5 font-mono text-[9px] uppercase tracking-widest border transition-all duration-150 ${
                     teamSize === preset.value
-                      ? 'bg-brand-500 border-brand-500 text-black font-bold'
-                      : 'border-slate-800 text-slate-600 hover:border-slate-600 hover:text-slate-300 bg-transparent'
+                      ? 'bg-black border-black text-white font-bold'
+                      : 'border-slate-800 text-black hover:border-slate-600 hover:text-black hover:bg-slate-100 bg-transparent'
                   }`}
                 >
                   {preset.label}
@@ -222,7 +214,7 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
             <div className="relative">
               <input
                 type="number" min={1} max={9999}
-                className="w-full bg-transparent border border-slate-800 focus:border-brand-500 p-2 font-mono text-sm text-slate-200 focus:outline-none transition-colors pr-14"
+                className="w-full bg-transparent border border-slate-800 focus:border-black p-2 font-mono text-sm text-black focus:outline-none transition-colors pr-14"
                 value={teamSize}
                 onChange={e => setTeamSize(Math.max(1, parseInt(e.target.value) || 1))}
               />
@@ -234,14 +226,14 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
           <div>
             <label className="block font-mono text-[9px] uppercase tracking-[0.2em] text-slate-500 mb-2.5">Use Case</label>
             {/* Invisible spacer to align with preset row above */}
-            <div className="mb-2 h-[30px]" />
+            <div className="mb-1 h-[30px]" />
             <select
-              className="w-full bg-transparent border border-slate-800 focus:border-brand-500 p-2 font-mono text-sm text-slate-200 focus:outline-none transition-colors cursor-pointer h-[38px]"
+              className="w-full bg-transparent border border-slate-800 focus:border-black p-2 font-mono text-sm text-black focus:outline-none transition-colors cursor-pointer h-[38px]"
               value={useCase}
               onChange={e => setUseCase(e.target.value as UseCase)}
             >
               {USE_CASES.map(uc => (
-                <option key={uc.value} value={uc.value} className="bg-slate-900">
+                <option key={uc.value} value={uc.value} className="bg-white">
                   {uc.label} — {uc.desc}
                 </option>
               ))}
@@ -251,7 +243,7 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
       </div>
 
       {/* ── 02. Tool Stack ──────────────────────────── */}
-      <div className="border border-slate-800 bg-slate-950/50 p-6">
+      <div className="border border-slate-800 bg-slate-50 p-6 rounded">
 
         <div className="flex items-start justify-between">
           <SectionLabel number="02" icon={Calculator} label="Tool Stack" />
@@ -274,13 +266,13 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
                 onClick={() => isAdded ? removeTool(tools.findIndex(te => te.toolId === tool.id)) : addTool(tool.id as ToolId)}
                 className={`p-2.5 border font-mono text-[9px] uppercase tracking-[0.08em] transition-all duration-150 text-left flex items-center gap-1.5 ${
                   isAdded
-                    ? 'border-brand-500/50 text-brand-400 bg-brand-500/8'
-                    : 'border-slate-800 text-slate-600 hover:border-slate-600 hover:text-slate-300 bg-transparent'
+                    ? 'bg-black border-black text-white font-bold'
+                    : 'border-slate-800 text-black hover:border-slate-600 hover:text-black hover:bg-slate-100 bg-transparent'
                 }`}
               >
-                <span className="text-sm" style={{ color: isAdded ? undefined : tool.color }}>{tool.logo}</span>
+                <span className="text-sm" style={{ color: isAdded ? undefined : tool.color }}></span>
                 <span className="truncate">{tool.name}</span>
-                {isAdded && <span className="ml-auto text-[8px] text-brand-500">✓</span>}
+                {isAdded && <span className="ml-auto text-[8px] text-white">✓</span>}
               </button>
             );
           })}
@@ -311,7 +303,7 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
         <button
           type="submit"
           disabled={tools.length === 0 || isLoading}
-          className="w-full bg-brand-500 text-black font-mono font-bold uppercase tracking-[0.2em] p-4 text-sm flex items-center justify-center gap-3 hover:bg-brand-400 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+          className="w-full bg-gray-900 text-white font-mono font-bold uppercase tracking-[0.2em] p-4 text-sm flex items-center justify-center gap-3 hover:bg-black transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>
@@ -320,9 +312,8 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
             </>
           ) : (
             <>
-              <Sparkles size={16} />
               Run Audit Engine
-              <ChevronRight size={16} />
+              <ArrowRight size={16} />
             </>
           )}
         </button>

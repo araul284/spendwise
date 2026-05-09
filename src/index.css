@@ -49,12 +49,6 @@ body {
 .font-serif { font-family: var(--font-serif); }
 .font-mono  { font-family: var(--font-mono); }
 
-/* ── Text-stroke dark (hollow headline) ── */
-.text-stroke-dark {
-  -webkit-text-stroke: 1.5px rgba(0, 0, 0, 1);
-  color: transparent;
-}
-
 /* ── Select / input resets for editorial bare style ── */
 select, input[type="number"], input[type="text"], input[type="email"] {
   appearance: none;

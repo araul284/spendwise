@@ -83,7 +83,12 @@ export default function HomePage() {
               {/* Editorial headline — mix of display weights + serif italic */}
               <h1 className="font-mono font-bold uppercase tracking-tighter leading-[0.88] text-5xl sm:text-7xl text-black mb-6">
                 Stop<br />
-                <span className="font-serif italic font-light normal-case text-stroke-dark">
+                <span className="font-serif italic font-light normal-case"
+                  style={{
+                    WebkitTextStroke: '1.2px rgba(0, 0, 0, 0.8)',
+                    color: 'transparent'
+                  }}
+                  >
                   overpaying
                 </span>
                 <br />

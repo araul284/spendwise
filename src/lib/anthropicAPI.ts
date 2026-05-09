@@ -8,21 +8,36 @@ export async function generateAISummary(audit: AuditResult): Promise<string> {
   }
 
   const { findings, totalMonthlySavings, totalAnnualSavings, input } = audit;
-  const overItems = findings.filter(f => f.status === 'overspending').map(f => f.toolName);
-  const subItems = findings.filter(f => f.status === 'suboptimal').map(f => f.toolName);
+  const overItems = findings.filter(f => f.status === 'overspending');
+  const subItems  = findings.filter(f => f.status === 'suboptimal');
 
-  const prompt = `You are an AI spend advisor at SpendWise. Write a concise, personalized 80-100 word summary paragraph for an AI spend audit.
+  // Build a detailed per-tool breakdown for the prompt
+  const toolBreakdown = findings.map(f => {
+    const savingsNote = f.monthlySavings > 0
+      ? `saves $${f.monthlySavings.toFixed(0)}/mo`
+      : 'no savings';
+    return `- ${f.toolName} (${f.currentPlan}, $${f.currentSpend}/mo): ${f.status}. ${f.recommendation} (${savingsNote})`;
+  }).join('\n');
 
-Audit context:
+  const prompt = `You are a sharp AI spend advisor at SpendWise. Write a concise, personalized 90-110 word summary paragraph for an AI spend audit.
+
+Team context:
 - Team size: ${input.teamSize} people
 - Primary use case: ${input.useCase}
-- Tools audited: ${findings.map(f => f.toolName).join(', ')}
-- Overspending on: ${overItems.length > 0 ? overItems.join(', ') : 'nothing'}
-- Suboptimal plans: ${subItems.length > 0 ? subItems.join(', ') : 'none'}
+
+Per-tool findings:
+${toolBreakdown}
+
 - Total monthly savings potential: $${totalMonthlySavings.toFixed(0)}
 - Total annual savings potential: $${totalAnnualSavings.toFixed(0)}
 
-Write in second person ("your team", "you're"). Be specific to their stack. Be direct and actionable. No fluff. Do not start with "Your" or use generic openers. Max 100 words.`;
+Rules:
+- Write in second person ("your team", "you're")
+- Reference specific tool names and dollar amounts from the findings above
+- Explain WHY each issue is a problem (e.g. "Cursor Business adds SSO you don't need at 8 seats")
+- Be direct, no filler phrases
+- Do NOT start with "Your" or "The"
+- Max 110 words, one paragraph only`;
 
   try {
     const response = await fetch('/api/anthropic-summary', {
@@ -35,7 +50,7 @@ Write in second person ("your team", "you're"). Be specific to their stack. Be d
     const data = await response.json();
     return data.summary || generateFallbackSummary(audit);
   } catch {
-    // Direct API call as fallback (CORS may block in browser — that's expected)
+    // Direct browser call with the dangerous-allow header
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -47,7 +62,7 @@ Write in second person ("your team", "you're"). Be specific to their stack. Be d
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 200,
+          max_tokens: 250,
           messages: [{ role: 'user', content: prompt }],
         }),
       });
@@ -62,21 +77,30 @@ Write in second person ("your team", "you're"). Be specific to their stack. Be d
 }
 
 export function generateFallbackSummary(audit: AuditResult): string {
-  const { findings, totalMonthlySavings, input } = audit;
+  const { findings, totalMonthlySavings, totalAnnualSavings, input } = audit;
   const overspending = findings.filter(f => f.status === 'overspending');
-  const suboptimal = findings.filter(f => f.status === 'suboptimal');
+  const suboptimal   = findings.filter(f => f.status === 'suboptimal');
 
   if (audit.isOptimal) {
-    return `Impressive stack hygiene — your ${input.teamSize}-person team is running a lean AI toolset for ${input.useCase} work. No significant overspend detected across ${findings.length} tool${findings.length !== 1 ? 's' : ''}. Keep an eye on API costs as usage grows, and revisit quarterly as vendor pricing evolves.`;
+    return `Solid stack hygiene across ${findings.length} tool${findings.length !== 1 ? 's' : ''} — no significant overspend for a ${input.teamSize}-person ${input.useCase} team. Keep an eye on API costs as usage scales, and revisit quarterly as vendor pricing evolves.`;
   }
 
-  if (overspending.length > 0 && suboptimal.length > 0) {
-    return `Your ${input.teamSize}-person team is leaving $${totalMonthlySavings.toFixed(0)}/month on the table. The biggest wins are on ${overspending.map(f => f.toolName).join(' and ')} — plan mismatches for your team size. ${suboptimal.map(f => f.toolName).join(' and ')} could also be better matched to your ${input.useCase} workflow. Acting on these recommendations saves $${(totalMonthlySavings * 12).toFixed(0)} annually.`;
+  const parts: string[] = [];
+
+  // Per-tool overspend callouts
+  for (const f of overspending) {
+    parts.push(`${f.toolName} (${f.currentPlan}) is costing $${f.currentSpend}/mo — ${f.reason.split('.')[0]}.`);
   }
 
-  if (overspending.length > 0) {
-    return `Clear overspend detected: ${overspending.map(f => f.toolName).join(' and ')} are on plans that don't fit your ${input.teamSize}-person team's scale. Rightsizing these tools saves $${totalMonthlySavings.toFixed(0)}/month — $${(totalMonthlySavings * 12).toFixed(0)}/year — without losing any capability your team actively uses.`;
+  // Per-tool suboptimal callouts
+  for (const f of suboptimal) {
+    parts.push(`${f.toolName} is suboptimal for your ${input.useCase} workflow — ${f.reason.split('.')[0]}.`);
   }
 
-  return `Mostly healthy stack, but ${suboptimal.map(f => f.toolName).join(' and ')} could be better optimised for your ${input.useCase} focus. With some plan adjustments, your ${input.teamSize}-person team could save $${totalMonthlySavings.toFixed(0)}/month and reduce cognitive overhead from overlapping tools.`;
+  // Savings summary
+  parts.push(
+    `Acting on ${overspending.length + suboptimal.length} recommendation${overspending.length + suboptimal.length !== 1 ? 's' : ''} saves $${totalMonthlySavings.toFixed(0)}/mo ($${totalAnnualSavings.toFixed(0)}/yr) with no capability loss.`
+  );
+
+  return parts.join(' ');
 }

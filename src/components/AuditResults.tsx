@@ -149,7 +149,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
             </div>
           </div>
 
-          <div className="flex gap-3 flex-shrink-0">
+          <div className="flex gap-3 shrink-0">
             <button
               onClick={handleShare}
               className="border border-slate-700 hover:border-slate-500 p-4 flex flex-col items-center gap-1.5 transition-all"
@@ -165,7 +165,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
               className="border border-slate-700 hover:border-slate-500 p-4 flex flex-col items-center gap-1.5 transition-all disabled:opacity-40"
             >
               {exporting
-                ? <span className="w-[18px] h-[18px] border-2 border-slate-700 border-t-emerald-500 rounded-full animate-spin" />
+                ? <span className="w-4.5 h-4.5 border-2 border-slate-700 border-t-emerald-500 rounded-full animate-spin" />
                 : <Download size={18} className="text-slate-200" />}
               <span className="font-mono text-[8px] uppercase tracking-widest text-slate-400">Export PDF</span>
             </button>
@@ -254,7 +254,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
 
                         {/* Savings column */}
                         {finding.monthlySavings > 0 && (
-                          <div className="text-right flex-shrink-0">
+                          <div className="text-right shrink-0">
                             <div className="font-mono font-bold text-emerald-400 text-lg">
                               -${finding.monthlySavings.toFixed(0)}/mo
                             </div>

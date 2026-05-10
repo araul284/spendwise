@@ -226,9 +226,9 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
           <div>
             <label className="block font-mono text-[9px] uppercase tracking-[0.2em] text-slate-500 mb-2.5">Use Case</label>
             {/* Invisible spacer to align with preset row above */}
-            <div className="mb-1 h-[30px]" />
+            <div className="mb-1 h-7.5" />
             <select
-              className="w-full bg-transparent border border-slate-800 focus:border-black p-2 font-mono text-sm text-black focus:outline-none transition-colors cursor-pointer h-[38px]"
+              className="w-full bg-transparent border border-slate-800 focus:border-black p-2 font-mono text-sm text-black focus:outline-none transition-colors cursor-pointer h-9.5"
               value={useCase}
               onChange={e => setUseCase(e.target.value as UseCase)}
             >
@@ -248,7 +248,7 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
         <div className="flex items-start justify-between">
           <SectionLabel number="02" icon={Calculator} label="Tool Stack" />
           {totalEstimated > 0 && (
-            <div className="text-right flex-shrink-0 -mt-1 ml-4">
+            <div className="text-right shrink-0 -mt-1 ml-4">
               <div className="font-mono text-[8px] uppercase tracking-[0.2em] text-slate-600 mb-0.5">Est. Total/Mo</div>
               <div className="font-mono text-brand-400 font-bold text-xl">${totalEstimated.toFixed(0)}</div>
             </div>

@@ -20,9 +20,9 @@ function SectionLabel({ label }: { label: string }) {
 
 function StatusBadge({ status }: { status: AuditFinding['status'] }) {
   const styles: Record<AuditFinding['status'], string> = {
-    overspending: 'bg-red-950/40 border-red-900/50 text-red-400',
-    suboptimal:   'bg-amber-950/40 border-amber-900/50 text-amber-400',
-    optimal:      'bg-emerald-950/40 border-emerald-900/50 text-emerald-400',
+    overspending: 'bg-red-50 border-red-900 text-red-700',
+    suboptimal:   'bg-amber-50 border-amber-900 text-amber-700',
+    optimal:      'bg-emerald-50 border-emerald-900 text-emerald-700',
   };
   const labels: Record<AuditFinding['status'], string> = {
     overspending: '⚠ Overspending',
@@ -70,7 +70,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
       const canvas = await html2canvas(reportRef.current, {
         scale: 2,
         useCORS: true,
-        backgroundColor: '#000000',
+        backgroundColor: '#FFFFFF',
         // Fix: operate on cloned document elements with getComputedStyle on the CLONE
         onclone: (_clonedDoc, clonedElement) => {
           const elements = clonedElement.querySelectorAll<HTMLElement>('*');
@@ -80,7 +80,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
             const fg = el.style.color;
             // Wipe oklch/oklab — Tailwind v4 uses oklch, html2canvas can't render it
             if (bg && (bg.includes('oklch') || bg.includes('oklab'))) {
-              el.style.backgroundColor = '#000000';
+              el.style.backgroundColor = '#FFFFFF';
             }
             if (fg && (fg.includes('oklch') || fg.includes('oklab'))) {
               el.style.color = '#e2e8f0';
@@ -133,7 +133,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="p-8 border-b border-slate-800 bg-slate-950 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
           <div>
-            <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-slate-600 mb-3">
+            <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-slate-300 mb-3">
               Audit Report #{audit.id?.slice(-8).toUpperCase() ?? 'XXXXXXXX'}
             </div>
 
@@ -144,7 +144,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
             </div>
 
             {/* Annual savings — use correct field name */}
-            <div className="font-serif italic text-slate-400 text-xl mt-3">
+            <div className="font-serif italic text-slate-200 text-xl mt-3">
               Potential Annual Savings: <span className="text-emerald-400">${totalAnnual.toFixed(0)}</span>
             </div>
           </div>
@@ -154,20 +154,20 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
               onClick={handleShare}
               className="border border-slate-700 hover:border-slate-500 p-4 flex flex-col items-center gap-1.5 transition-all"
             >
-              <Share2 size={18} className="text-slate-400" />
-              <span className="font-mono text-[8px] uppercase tracking-widest text-slate-600">
+              <Share2 size={18} className="text-slate-200" />
+              <span className="font-mono text-[8px] uppercase tracking-widest text-slate-400">
                 {copied ? 'Copied!' : 'Share'}
               </span>
             </button>
             <button
               onClick={handleExportPDF}
               disabled={exporting}
-              className="border border-slate-700 hover:border-emerald-500 p-4 flex flex-col items-center gap-1.5 transition-all disabled:opacity-40"
+              className="border border-slate-700 hover:border-slate-500 p-4 flex flex-col items-center gap-1.5 transition-all disabled:opacity-40"
             >
               {exporting
                 ? <span className="w-[18px] h-[18px] border-2 border-slate-700 border-t-emerald-500 rounded-full animate-spin" />
-                : <Download size={18} className="text-slate-400" />}
-              <span className="font-mono text-[8px] uppercase tracking-widest text-slate-600">Export PDF</span>
+                : <Download size={18} className="text-slate-200" />}
+              <span className="font-mono text-[8px] uppercase tracking-widest text-slate-400">Export PDF</span>
             </button>
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
             {audit.aiSummary && (
               <section>
                 <SectionLabel label="AI Analysis" />
-                <div className="font-serif italic text-slate-300 text-xl leading-snug">
+                <div className="font-serif italic text-slate-800 text-xl leading-snug">
                   {audit.aiSummary}
                 </div>
               </section>
@@ -195,7 +195,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
               {actionableFindings.length === 0 ? (
                 <div className="p-8 text-center border border-dashed border-slate-800">
                   <ShieldCheck size={40} className="text-emerald-500 mx-auto mb-3" />
-                  <div className="font-mono font-bold uppercase tracking-[0.2em] text-slate-200 mb-1">
+                  <div className="font-mono font-bold uppercase tracking-[0.2em] text-slate-800 mb-1">
                     Optimization: Perfect
                   </div>
                   <p className="font-mono text-[10px] uppercase tracking-widest text-slate-600">
@@ -207,13 +207,13 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
                   {actionableFindings.map((finding, i) => (
                     <div
                       key={`${finding.toolId}-${i}`}
-                      className="border border-slate-800 hover:border-slate-700 transition-all overflow-hidden"
+                      className="border border-slate-800 hover:border-slate-300 transition-all overflow-hidden"
                     >
                       <div className="p-5 flex justify-between items-start gap-4">
                         <div className="space-y-2 flex-1">
                           {/* Tool badge + status */}
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="inline-block font-mono text-[8px] uppercase tracking-widest bg-slate-900 border border-slate-700 text-slate-400 px-1.5 py-0.5">
+                            <span className="inline-block font-mono text-[8px] uppercase tracking-widest bg-slate-900 border border-slate-700 text-slate-200 px-1.5 py-0.5">
                               {finding.toolName}
                             </span>
                             <StatusBadge status={finding.status} />
@@ -223,12 +223,12 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
                           </div>
 
                           {/* Recommendation headline */}
-                          <div className="font-mono font-bold uppercase tracking-tight text-slate-100 text-sm">
+                          <div className="font-mono font-bold uppercase tracking-tight text-slate-800 text-sm">
                             {finding.recommendation}
                           </div>
 
                           {/* Detailed reasoning */}
-                          <p className="font-mono text-[11px] text-slate-500 leading-relaxed">
+                          <p className="font-mono text-[11px] text-slate-600 leading-relaxed">
                             {finding.reason}
                           </p>
 
@@ -277,23 +277,23 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
                 <div className="border border-slate-800 overflow-hidden">
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="border-b border-slate-800 bg-slate-950">
+                      <tr className="border-b border-slate-800 bg-black">
                         {['Tool', 'Plan', 'Monthly Spend', 'Status', 'Savings'].map(h => (
-                          <th key={h} className="font-mono text-[7px] uppercase tracking-[0.2em] text-slate-700 px-3 py-2">{h}</th>
+                          <th key={h} className="font-mono text-[7px] uppercase tracking-[0.2em] text-white px-3 py-2">{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {(audit.findings ?? []).map((f, i) => (
-                        <tr key={i} className="border-b border-slate-800/50 hover:bg-slate-900/30 transition-colors">
-                          <td className="font-mono text-[10px] text-slate-300 px-3 py-2">{f.toolName}</td>
-                          <td className="font-mono text-[10px] text-slate-500 px-3 py-2">{f.currentPlan}</td>
-                          <td className="font-mono text-[10px] text-slate-400 px-3 py-2">${f.currentSpend}/mo</td>
+                        <tr key={i} className="border-b border-slate-800/50 hover:bg-slate-200 transition-colors">
+                          <td className="font-mono text-[10px] text-slate-800 px-3 py-2">{f.toolName}</td>
+                          <td className="font-mono text-[10px] text-slate-600 px-3 py-2">{f.currentPlan}</td>
+                          <td className="font-mono text-[10px] text-slate-500 px-3 py-2">${f.currentSpend}/mo</td>
                           <td className="px-3 py-2"><StatusBadge status={f.status} /></td>
                           <td className="font-mono text-[10px] px-3 py-2">
                             {f.monthlySavings > 0
                               ? <span className="text-emerald-400">-${f.monthlySavings.toFixed(0)}/mo</span>
-                              : <span className="text-slate-700">—</span>}
+                              : <span className="text-slate-200">—</span>}
                           </td>
                         </tr>
                       ))}
@@ -305,7 +305,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
           </div>
 
           {/* ── Right sidebar ───────────────────────────────────── */}
-          <div className="p-8 bg-slate-950/60 space-y-10">
+          <div className="p-8 bg-white space-y-10">
             <section>
               <SectionLabel label="Next Steps" />
               {totalMonthly > 500 ? (
@@ -320,14 +320,14 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
                     href="https://credex.rocks"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full bg-emerald-500 text-black font-mono font-bold uppercase tracking-[0.2em] text-[10px] p-3 flex items-center justify-center gap-2 hover:bg-emerald-400 transition-colors"
+                    className="w-full bg-emerald-500 text-black font-mono font-bold uppercase tracking-[0.2em] text-[10px] p-3 flex items-center justify-center gap-2 hover:bg-black transition-colors"
                   >
                     Book Consultation <ArrowRight size={12} />
                   </a>
                 </div>
               ) : (
                 <div className="border border-slate-800 p-6 space-y-4">
-                  <div className="font-mono font-bold uppercase tracking-tight text-slate-100 text-lg leading-tight">
+                  <div className="font-mono font-bold uppercase tracking-tight text-slate-800 text-lg leading-tight">
                     Stay<br />Optimized.
                   </div>
                   <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-slate-600 leading-relaxed">
@@ -349,7 +349,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
                       <button
                         type="button"
                         onClick={() => email && setSubscribed(true)}
-                        className="w-full bg-slate-900 border border-slate-700 hover:border-emerald-500 text-slate-400 hover:text-emerald-400 font-mono text-[9px] uppercase tracking-[0.2em] p-3 transition-colors"
+                        className="w-full bg-slate-900 border border-slate-700 hover:border-black text-slate-400 hover:text-white font-mono text-[9px] uppercase tracking-[0.2em] p-3 transition-colors"
                       >
                         Subscribe
                       </button>
@@ -382,13 +382,13 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
       <div className="flex justify-center gap-4">
         <button
           onClick={onStartOver}
-          className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] border border-slate-800 hover:border-slate-600 hover:text-slate-300 text-slate-600 px-6 py-3 transition-all"
+          className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] border border-slate-800 hover:border-slate-600 hover:text-slate-900 text-slate-600 px-6 py-3 transition-all"
         >
           <RotateCcw size={12} /> New Audit
         </button>
         <button
           onClick={handleShare}
-          className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] border border-slate-800 hover:border-emerald-500 hover:text-emerald-400 text-slate-600 px-6 py-3 transition-all"
+          className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] border border-slate-800 hover:border-slate-600 hover:text-slate-900 text-slate-600 px-6 py-3 transition-all"
         >
           <Share2 size={12} /> {copied ? 'Copied!' : 'Share Report'}
         </button>

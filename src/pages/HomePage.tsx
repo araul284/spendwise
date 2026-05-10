@@ -173,12 +173,12 @@ export default function HomePage() {
       <footer className="border-t border-slate-800 py-6 mt-auto">
         <div className="max-w-3xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-700">
-            <a href="https://github.com/araul284/credex-ai.git" target="_blank" rel="noopener noreferrer" className="hover:text-slate-500 transition-colors">
+            <a href="https://github.com/araul284/credex-ai.git" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors">
               SpendWise
             </a> © 2026 / Precision Financial Audit
           </span>
           <div className="flex items-center gap-6 font-mono text-[9px] uppercase tracking-[0.2em] text-slate-700">
-            <a href="/audit/demo" className="hover:text-slate-400 transition-colors">Sample audit</a>
+            <a href="/audit/demo" className="hover:text-slate-900 transition-colors">Sample audit</a>
           </div>
         </div>
       </footer>

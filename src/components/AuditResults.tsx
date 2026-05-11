@@ -176,7 +176,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
         <div className="grid md:grid-cols-3 md:divide-x md:divide-slate-800">
 
           {/* Left: AI analysis + per-tool findings */}
-          <div className="md:col-span-2 p-8 space-y-10">
+          <div className="md:col-span-2 p-4 md:p-8 space-y-6 md:space-y-10">
 
             {/* AI Summary */}
             {audit.aiSummary && (
@@ -305,7 +305,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
           </div>
 
           {/* ── Right sidebar ───────────────────────────────────── */}
-          <div className="p-8 bg-white space-y-10">
+          <div className="p-4 md:p-8 bg-white space-y-10">
             <section>
               <SectionLabel label="Next Steps" />
               {totalMonthly > 500 ? (

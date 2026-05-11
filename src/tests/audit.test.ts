@@ -64,11 +64,11 @@ describe('Audit engine — plan fit rules', () => {
   });
 
   // ─── Test 5: Large API spend triggers Credex flag ────────────────────────
-  it('marks Anthropic API as overspending and credexApplicable at $600/mo', () => {
+  it('marks Anthropic API as overspending and credexApplicable at $500/mo', () => {
     const input: AuditInput = {
       teamSize: 10,
       useCase: 'data',
-      tools: [{ toolId: 'anthropic_api', plan: 'payg', seats: 1, monthlySpend: 600 }],
+      tools: [{ toolId: 'anthropic_api', plan: 'payg', seats: 1, monthlySpend: 500 }],
     };
     const result = runAudit(input);
     const finding = result.findings[0];

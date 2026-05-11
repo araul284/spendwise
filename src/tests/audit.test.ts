@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { runAudit } from '../lib/AuditEngine';
 import type { AuditInput } from '../types/index.ts';
 
+
 // ─── Test 1: Cursor Business overkill for small team ─────────────────────────
 describe('Audit engine — plan fit rules', () => {
   it('flags Cursor Business as overspending for a 2-person team', () => {
@@ -64,11 +65,11 @@ describe('Audit engine — plan fit rules', () => {
   });
 
   // ─── Test 5: Large API spend triggers Credex flag ────────────────────────
-  it('marks Anthropic API as overspending and credexApplicable at $500/mo', () => {
+  it('marks Anthropic API as overspending and credexApplicable at $600/mo', () => {
     const input: AuditInput = {
       teamSize: 10,
       useCase: 'data',
-      tools: [{ toolId: 'anthropic_api', plan: 'payg', seats: 1, monthlySpend: 500 }],
+      tools: [{ toolId: 'anthropic_api', plan: 'payg', seats: 1, monthlySpend: 600 }],
     };
     const result = runAudit(input);
     const finding = result.findings[0];

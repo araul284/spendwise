@@ -246,7 +246,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
 
                           {/* Credex badge */}
                           {finding.credexApplicable && (
-                            <div className="inline-flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-widest text-emerald-500 border border-emerald-900/50 bg-emerald-950/20 px-2 py-1">
+                            <div className="inline-flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-widest text-emerald-700 border border-emerald-900 bg-emerald-50 px-2 py-1">
                               <Info size={8} /> Credex credits applicable
                             </div>
                           )}
@@ -309,8 +309,8 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
             <section>
               <SectionLabel label="Next Steps" />
               {totalMonthly > 500 ? (
-                <div className="border border-slate-700 bg-slate-900 p-6 space-y-4">
-                  <div className="font-mono font-bold uppercase tracking-tight text-slate-100 text-lg leading-tight">
+                <div className="border border-slate-800 p-6 space-y-4">
+                  <div className="font-mono font-bold uppercase tracking-tight text-slate-800 text-lg leading-tight">
                     High Savings<br />Detected.
                   </div>
                   <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-slate-600 leading-relaxed">
@@ -320,7 +320,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
                     href="https://credex.rocks"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full bg-emerald-500 text-black font-mono font-bold uppercase tracking-[0.2em] text-[10px] p-3 flex items-center justify-center gap-2 hover:bg-black transition-colors"
+                    className="w-full bg-slate-900 text-slate-200 font-mono font-bold uppercase tracking-[0.2em] text-[10px] p-3 flex items-center justify-center gap-2 hover:bg-black hover:text-white transition-colors"
                   >
                     Book Consultation <ArrowRight size={12} />
                   </a>

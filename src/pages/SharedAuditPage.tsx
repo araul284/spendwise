@@ -64,7 +64,7 @@ export default function SharedAuditPage() {
           <div className="text-5xl mb-4">🔍</div>
           <h1 className="font-mono font-bold text-xl text-slate-800 mb-2 uppercase tracking-wider">Audit not found</h1>
           <p className="text-slate-600 text-xs font-mono mb-6">This audit may have expired or the link is incorrect.</p>
-          <Link to="/" className="btn-primary font-mono text-xs uppercase tracking-widest">Run your own audit</Link>
+          <Link to="/" className="btn-primary font-mono text-xs text-slate-800 uppercase tracking-widest">Run your own audit</Link>
         </div>
       </div>
     );
@@ -88,7 +88,7 @@ export default function SharedAuditPage() {
       </nav>
 
       {/* Shared notice */}
-      <div className="w-full px-4 md:px-8 pt-6">
+      <div className="max-w-3xl mx-auto px-4 md:px-8 pt-6">
         <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-slate-700 mb-6 border border-surface-border px-4 py-2.5">
           <span className="w-1.5 h-1.5 bg-slate-700" />
           Shared audit · Personal details removed
@@ -96,7 +96,7 @@ export default function SharedAuditPage() {
         </div>
       </div>
 
-      <main className="w-full pb-20">
+      <main className="max-w-3xl mx-auto px-4 pt-6 pb-20">
         {audit && (
           <AuditResults
             audit={audit}

@@ -10,6 +10,40 @@ SpendWise is a free web app that audits your team's AI tool spend in seconds. In
 
 > `https://spendwise-roan-six.vercel.app`
 
+## Demo
+
+SpendWise analyzes your AI tool stack and finds cheaper alternative without switching workflows.
+
+### 1. Input your current stack
+Add team size, use case, and current AI tools. Takes 30 seconds.
+
+<p align="center">
+    <img src=/screenshots/audit-input-desktop.png" alt="SpendWise input form on desktop" width="700">
+    <br>
+    <em>Desktop</em>
+</p>
+
+<p align="center">
+    <img src=/screenshots/audit-input-mobile.png" alt="SpendWise input form on mobile" width="350">
+    <br>
+    <em>Mobile</em>
+</p>
+
+### 2. Get your optimization report
+See monthly/annual savings, specific tool recommendations, and optimization status comparison.
+
+<p align="center">
+    <img src=/screenshots/audit-results-desktop.png" alt="SpendWise results showing $330 per month potential savings with recommendations" width="700">
+    <br>
+    <em>Desktop - $330/mo savings detected</em>
+</p>
+
+<p align="center">
+    <img src=/screenshots/audit-results-mobile.png" alt="Mobile view of SpendWise audit results" width="350">
+    <br>
+    <em>Mobile</em>
+</p>
+
 ---
 
 ## Quick Start

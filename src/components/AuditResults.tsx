@@ -128,7 +128,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
 
   return (
     <div className="space-y-10 animate-fade-in">
-      <div ref={reportRef} className="border border-slate-800 overflow-hidden">
+      <div ref={reportRef} className="border border-slate-800">
 
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="p-8 border-b border-slate-800 bg-slate-950 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
@@ -274,8 +274,8 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
             {(audit.findings ?? []).length > 0 && (
               <section>
                 <SectionLabel label="Full Stack Overview" />
-                <div className="border border-slate-800 overflow-hidden">
-                  <table className="w-full text-left">
+                <div className="border border-slate-800 overflow-x-auto">
+                  <table className="w-full text-left min-w-[600px]">
                     <thead>
                       <tr className="border-b border-slate-800 bg-black">
                         {['Tool', 'Plan', 'Monthly Spend', 'Status', 'Savings'].map(h => (

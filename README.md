@@ -18,13 +18,13 @@ SpendWise analyzes your AI tool stack and finds cheaper alternative without swit
 Add team size, use case, and current AI tools. Takes 30 seconds.
 
 <p align="center">
-    <img src=/screenshots/audit-input-desktop.png" alt="SpendWise input form on desktop" width="700">
+    <img src=public/screenshots/audit-input-desktop.png" alt="SpendWise input form on desktop" width="700">
     <br>
     <em>Desktop</em>
 </p>
 
 <p align="center">
-    <img src=/screenshots/audit-input-mobile.png" alt="SpendWise input form on mobile" width="350">
+    <img src=public/screenshots/audit-input-mobile.png" alt="SpendWise input form on mobile" width="350">
     <br>
     <em>Mobile</em>
 </p>
@@ -33,13 +33,13 @@ Add team size, use case, and current AI tools. Takes 30 seconds.
 See monthly/annual savings, specific tool recommendations, and optimization status comparison.
 
 <p align="center">
-    <img src=/screenshots/audit-results-desktop.png" alt="SpendWise results showing $330 per month potential savings with recommendations" width="700">
+    <img src=public/screenshots/audit-results-desktop.png" alt="SpendWise results showing $330 per month potential savings with recommendations" width="700">
     <br>
     <em>Desktop - $330/mo savings detected</em>
 </p>
 
 <p align="center">
-    <img src=/screenshots/audit-results-mobile.png" alt="Mobile view of SpendWise audit results" width="350">
+    <img src=public/screenshots/audit-results-mobile.png" alt="Mobile view of SpendWise audit results" width="350">
     <br>
     <em>Mobile</em>
 </p>

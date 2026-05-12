@@ -21,13 +21,37 @@
 }
 
 /* ── Base reset ── */
-*, *::before, *::after { box-sizing: border-box; }
+*, *::before, *::after { 
+  box-sizing: border-box;
+  min-width: 0; }
+
+html, body, #root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
 
 body {
   background: #000;
   color: #e2e8f0;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+img, video, canvas, svg, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+td, th, pre, code {
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 /* ── Legacy glass-card (kept for shared pages) ── */

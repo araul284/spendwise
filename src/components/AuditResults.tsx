@@ -132,7 +132,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
 
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="p-4 sm:p-6 md:p-8 border-b border-slate-800 bg-slate-950 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8">
-          <div className="w-full md:w-auto">
+          <div className="w-full md:w-auto min-w-0">
             <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-slate-300 mb-3">
               Audit Report #{audit.id?.slice(-8).toUpperCase() ?? 'XXXXXXXX'}
             </div>
@@ -182,7 +182,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
             {audit.aiSummary && (
               <section>
                 <SectionLabel label="AI Analysis" />
-                <div className="font-serif italic text-slate-800 text-xl leading-snug wrap-break-word">
+                <div className="font-serif italic text-slate-800 text-xl leading-snug braek-words">
                   {audit.aiSummary}
                 </div>
               </section>
@@ -209,7 +209,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
                       key={`${finding.toolId}-${i}`}
                       className="border border-slate-800 hover:border-slate-300 transition-all overflow-hidden"
                     >
-                      <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
+                      <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4 min-w-0">
                         <div className="space-y-2 flex-1 min-w-0">
                           {/* Tool badge + status */}
                           <div className="flex items-center gap-2 flex-wrap">
@@ -217,7 +217,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
                               {finding.toolName}
                             </span>
                             <StatusBadge status={finding.status} />
-                            <span className="font-mono text-[8px] text-slate-600 wrap-break-word">
+                            <span className="font-mono text-[8px] text-slate-600 break-words">
                               Current: {finding.currentPlan} · ${finding.currentSpend}/mo
                             </span>
                           </div>
@@ -278,9 +278,11 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
                   <table className="w-full text-left">
                     <thead>
                       <tr className="border-b border-slate-800 bg-black">
-                        {['Tool', 'Plan', 'Monthly Spend', 'Status', 'Savings'].map(h => (
-                          <th key={h} className="font-mono text-[7px] uppercase tracking-[0.2em] text-white px-3 py-2">{h}</th>
-                        ))}
+                          <th className="font-mono text-[7px] uppercase tracking-[0.2em] text-white px-3 py-2">TOOL</th>
+                          <th className="font-mono text-[7px] uppercase tracking-[0.2em] text-white px-3 py-2">PLAN</th>
+                          <th className="hidden sm:table-cell font-mono text-[7px] uppercase tracking-[0.2em] text-white px-3 py-2">MONTHLY SPEND</th>
+                          <th className="font-mono text-[7px] uppercase tracking-[0.2em] text-white px-3 py-2">STATUS</th>
+                          <th className="font-mono text-[7px] uppercase tracking-[0.2em] text-white px-3 py-2">SAVINGS</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -288,7 +290,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
                         <tr key={i} className="border-b border-slate-800/50 hover:bg-slate-200 transition-colors">
                           <td className="font-mono text-[10px] text-slate-800 px-3 py-2">{f.toolName}</td>
                           <td className="font-mono text-[10px] text-slate-600 px-3 py-2">{f.currentPlan}</td>
-                          <td className="font-mono text-[10px] text-slate-500 px-3 py-2">${f.currentSpend}/mo</td>
+                          <td className="hidden sm:table-cell font-mono text-[10px] text-slate-500 px-3 py-2">${f.currentSpend}/mo</td>
                           <td className="px-3 py-2"><StatusBadge status={f.status} /></td>
                           <td className="font-mono text-[10px] px-3 py-2">
                             {f.monthlySavings > 0

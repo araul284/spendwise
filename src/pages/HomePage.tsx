@@ -75,8 +75,8 @@ export default function HomePage() {
             <div className="mb-14 animate-fade-up">
 
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.25em] text-brand-400 mb-8 border border-brand-500/25 bg-brand-500/8 px-3 py-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
+              <div className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.25em] text-slate-800 mb-8 border border-slate-400 bg-slate-100 px-3 py-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-600 animate-pulse" />
                 Free AI spend audit
               </div>
 

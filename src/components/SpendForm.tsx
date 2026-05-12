@@ -212,22 +212,27 @@ export default function SpendForm({ onSubmit, isLoading }: SpendFormProps) {
             </div>
             {/* Manual input */}
             <div className="relative">
+              <label htmlFor="team-size-input" className='sr-only'>TEAM SIZE</label>
               <input
                 type="number" min={1} max={9999}
                 className="w-full bg-transparent border border-slate-800 focus:border-black p-2 font-mono text-sm text-black focus:outline-none transition-colors pr-14"
                 value={teamSize}
                 onChange={e => setTeamSize(Math.max(1, parseInt(e.target.value) || 1))}
+                aria-describedby="team-size-hint"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[8px] uppercase tracking-widest text-slate-700">Seats</span>
+              <span 
+                id="team-size-hint"
+                className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[8px] uppercase tracking-widest text-slate-700">Seats</span>
             </div>
           </div>
 
           {/* Use case */}
           <div>
-            <label className="block font-mono text-[9px] uppercase tracking-[0.2em] text-slate-500 mb-2.5">Use Case</label>
+            <label htmlFor="use-case-select" className="block font-mono text-[9px] uppercase tracking-[0.2em] text-slate-500 mb-2.5">Use Case</label>
             {/* Invisible spacer to align with preset row above */}
             <div className="mb-1 h-7.5" />
             <select
+              id="use-case-select"
               className="w-full bg-transparent border border-slate-800 focus:border-black p-2 font-mono text-sm text-black focus:outline-none transition-colors cursor-pointer h-9.5"
               value={useCase}
               onChange={e => setUseCase(e.target.value as UseCase)}

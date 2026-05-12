@@ -119,7 +119,7 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
               el.style.color = '#e2e8f0';
             }
             // Also force inline computed backgrounds that Tailwind v4 injects via CSS vars
-            const computed = window.getComputedStyle(el);
+            const computed = (_clonedDoc.defaultView ?? window).getComputedStyle(el);
             const cBg = computed.backgroundColor;
             const cFg = computed.color;
             if (cBg && (cBg.includes('oklch') || cBg.includes('oklab'))) {

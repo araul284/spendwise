@@ -98,8 +98,25 @@
 **Plan for tomorrow:** Fix PDF export and any other bugs or inconsistencies. Add Prompts documentation. Write project reflections.
 
 ## Day 7 — 2026-05-12
-**Hours worked:** 
+**Hours worked:** 9
 **What I did:** 
+    - Finished MVP end-to-end
+        Spend input form → Tool usage, right plan, and cheaper alternatives evaluation → Audit results displayed eith AI analysis → localSt
+    - Made website fully responsive
+        Mobile layouts, hamburger menu, tested on both desktop/mobile
+    - Overhauled `README.md`
+        Added live demo with 4 screenshots
+    - Fixed git push issues with large PNGs using `http.postBuffer`
+    - Debugged broken README images
+        Root cause was missing open quotes in all 4 `<img src>` tags
+    - Debugged the mobile responsive UI
+        Root cause was that the `index.css` did not have the minimum width for the body declared
+    - Added the connection for lead capture between `AuditResults.tsx` with Supabase
 **What I learned:** 
-**Blockers / What I'm stuck on:** 
-**Plan for tomorrow:** 
+    - *HTML is unforgiving*
+        One missing `"` broke all 4 images and keeps giving misleading 404s.
+    - *1.3MB PNGs are overkill for README docs*
+        Fails to push to remote origin.
+    - *Adding min width is essential in `index.css`*
+        Always make surec to add min width accordingly to ensure device responsiveness and text or container overflow when switching from Desktop view to Mobile view.
+**Blockers / What I'm stuck on:** PDF export deffered

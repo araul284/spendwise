@@ -31,7 +31,7 @@ create table if not exists leads (
   email text not null,
   company_name text,
   role text,
-  team_size int,
+  team_size text,
   captured_at timestamptz not null default now()
 );
 

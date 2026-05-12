@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Share2, Download, RotateCcw, ShieldCheck, Info, ArrowRight } from 'lucide-react';
 import type { AuditResult, AuditFinding } from '../types';
+import { saveLead } from '../lib/supabase';
 
 interface AuditResultsProps {
   audit: AuditResult;
@@ -42,6 +43,8 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
   const [exporting, setExporting] = useState(false);
   const [email, setEmail]         = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [website, setWebsite] = useState('');
 
   // Use correct field names from AuditEngine output
   const totalMonthly = audit.totalMonthlySavings ?? 0;
@@ -49,6 +52,36 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
 
   // Only show findings that are not optimal
   const actionableFindings = (audit.findings ?? []).filter(f => f.status !== 'optimal');
+
+  async function handleLeadSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email || submitting) return;
+    if (website) return; //bot filled honeypot
+
+    setSubmitting(true);
+    try {
+      await saveLead({
+        email,
+        auditId: audit.id,
+        companyName: undefined, //optional - skipping for MVP
+        role: undefined,
+        teamSize: undefined
+      });
+
+      //Fire email after save succeeds
+      await fetch('api/send-audit-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, auditId: audit.id, savings: totalAnnual })
+      });
+
+      setSubscribed(true);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save. Try again.');
+    }
+    setSubmitting(false);
+  }
 
   async function handleShare() {
     try {
@@ -337,25 +370,35 @@ export default function AuditResults({ audit, onStartOver, shareUrl }: AuditResu
                   </p>
                   {subscribed ? (
                     <div className="font-mono text-[9px] uppercase tracking-widest text-emerald-500 border border-emerald-900 bg-emerald-950/30 p-3 text-center">
-                      ✓ Subscribed
+                      ✓ Subscribed - Check your email
                     </div>
                   ) : (
-                    <div className="space-y-2">
+                    <form onSubmit={handleLeadSubmit} className="space-y-2">
                       <input
                         type="email"
                         placeholder="EMAIL ADDRESS"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
+                        required
                         className="w-full bg-transparent border-b border-slate-700 focus:border-emerald-500 pb-1.5 font-mono text-xs text-slate-300 focus:outline-none transition-colors placeholder:text-slate-700"
+                      />
+                      <input
+                        type="text"
+                        name="website"
+                        value={website}
+                        onChange={e => setWebsite(e.target.value)}
+                        style={{ position: 'absolute', left: '-9999px'}}
+                        tabIndex={-1}
+                        autoComplete="off"
                       />
                       <button
                         type="button"
-                        onClick={() => email && setSubscribed(true)}
+                        disabled={submitting}
                         className="w-full bg-slate-900 border border-slate-700 hover:border-black text-slate-400 hover:text-white font-mono text-[9px] uppercase tracking-[0.2em] p-3 transition-colors"
                       >
-                        Subscribe
+                        {submitting? 'Saving...' : 'Subscribe'}
                       </button>
-                    </div>
+                    </form>
                   )}
                 </div>
               )}
